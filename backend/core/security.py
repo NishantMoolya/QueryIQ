@@ -4,6 +4,7 @@ class Security():
                      "/api/v1/user/profile",
                      "/api/v1/file/upload",
                      "/api/v1/file/add",
+                     "/api/v1/chat/answer",
                     ]
     
 security = Security()
