@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import GradientText from "@/components/ui/GradientText/GradientText";
 import {
   Plus,
   MessageSquare,
@@ -20,6 +21,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { supabase } from "@/lib/supabaseClient";
+import axiosInstance from "@/api/axios";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -117,17 +119,18 @@ const Dashboard = () => {
 
     try {
       const uploadedDocs = [];
+      const pdfFiles = []; // collect PDFs for batch upload
 
       for (const file of selectedFiles) {
-        // check if file is CSV
         const isCSV = file.type === "text/csv" || file.name.endsWith(".csv");
 
         if (isCSV) {
+          // Upload CSV to Supabase
           const fileName = `${Date.now()}_${file.name}`;
           const filePath = `csv_files/${fileName}`;
 
-          const {data, error } = await supabase.storage
-            .from("csv_files") // your Supabase bucket
+          const { data, error } = await supabase.storage
+            .from("csv_files")
             .upload(filePath, file, {
               cacheControl: "3600",
               upsert: false,
@@ -137,13 +140,11 @@ const Dashboard = () => {
             console.error("Supabase upload error:", error.message);
             alert(`Failed to upload ${file.name}: ${error.message}`);
             continue;
-          } 
-          
+          }
 
           const { data: publicData } = supabase.storage
             .from("csv_files")
             .getPublicUrl(filePath);
-            console.log(publicData.publicUrl)
 
           uploadedDocs.push({
             id: documents.length + uploadedDocs.length + 1,
@@ -151,11 +152,17 @@ const Dashboard = () => {
             type: file.type,
             size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
             thumbnail: null,
-            url: publicData.publicUrl, // available for later viewing/downloading
-            storedIn: "supabase", // tag it for clarity
+            url: publicData.publicUrl,
+            storedIn: "supabase",
           });
+        } else if (
+          file.type === "application/pdf" ||
+          file.name.endsWith(".pdf")
+        ) {
+          // Collect PDFs for API upload
+          pdfFiles.push(file);
         } else {
-          // For non-CSV files, just add locally for now
+          // Discard unsupported file types but still add locally
           uploadedDocs.push({
             id: documents.length + uploadedDocs.length + 1,
             name: file.name,
@@ -164,14 +171,45 @@ const Dashboard = () => {
             thumbnail: file.type.startsWith("image/")
               ? URL.createObjectURL(file)
               : null,
-            storedIn: "local", // tag as not yet handled
+            storedIn: "local",
           });
         }
       }
 
+      // Upload all PDFs in a single request
+      if (pdfFiles.length > 0) {
+        const formData = new FormData();
+        pdfFiles.forEach((pdf) => formData.append("files", pdf));
+
+        try {
+          const res = await axiosInstance.post("/file/upload", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+
+          // Add uploaded PDFs to documents state
+          pdfFiles.forEach((pdf, idx) => {
+            uploadedDocs.push({
+              id: documents.length + uploadedDocs.length + 1,
+              name: pdf.name,
+              type: pdf.type,
+              size: `${(pdf.size / (1024 * 1024)).toFixed(1)} MB`,
+              thumbnail: null,
+              storedIn: "api",
+              apiResponse: res.data[idx] || res.data, // store response info if needed
+            });
+          });
+        } catch (err) {
+          console.error("PDF upload error:", err.message);
+          alert("Error uploading PDFs: " + err.message);
+        }
+      }
+
+      // Update state with all uploaded files
       if (uploadedDocs.length > 0) {
         setDocuments([...documents, ...uploadedDocs]);
-        alert("Upload complete. CSVs stored in Supabase.");
+        alert(
+          "Upload complete. CSVs stored in Supabase, PDFs uploaded via API."
+        );
       }
 
       setOpenUpload(false);
@@ -208,8 +246,22 @@ const Dashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
-                Dashboard
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold  bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
+                <GradientText
+                  colors={[
+                    "#d97a36",
+                    "#d97a36",
+                    "#4079ff",
+                    "#40ffaa",
+                    "#d97a36",
+                  ]}
+                  animationSpeed={10}
+                  showBorder={false}
+                  // className="font-extrabold"
+                >
+                   
+                  Dashboard
+                </GradientText>
               </h1>
               <p className="text-gray-400 text-sm sm:text-base mt-2">
                 Manage your databases and documents
