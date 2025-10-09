@@ -8,5 +8,3 @@ def createLLM():
     except Exception as e:
         print(f"LLM Initialization failed {str(e)}")
         return None
-
-
