@@ -36,4 +36,5 @@ app.add_middleware(AuthMiddleware)
 # Include the routers
 app.include_router(user_router, prefix="/api/v1/user", tags=["User Authentication"])
 app.include_router(files_router, prefix="/api/v1/file", tags=["File Uploads"])
-app.include_router(sql_router, prefix="/api/v1/sql", tags=["SQL Execution"])app.include_router(chat_router, prefix="/api/v1/chat", tags=["ChatBot"])
+app.include_router(sql_router, prefix="/api/v1/sql", tags=["SQL Execution"])
+app.include_router(chat_router, prefix="/api/v1/chat", tags=["ChatBot"])
