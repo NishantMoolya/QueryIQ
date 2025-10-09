@@ -1,4 +1,4 @@
-def build_schema_prompt(schemas: dict) -> str:
+def build_schema_prompt(schemas: str) -> str:
     """
     Combine multiple table schemas into a formatted prompt string.
     """
