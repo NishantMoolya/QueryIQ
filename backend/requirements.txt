@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pymongo
+bcrypt
+pyjwt
+langchain
+langchain-community
+langchain-huggingface
+openai
+python-multipart
