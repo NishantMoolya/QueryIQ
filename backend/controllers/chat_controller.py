@@ -2,6 +2,8 @@ from fastapi.responses import JSONResponse
 from services.router_chatbot import router_chat
 from services.rag_chatbot import rag_chat
 from services.db_chatbot import db_chat
+from services.csv_chatbot import csv_chat
+from services.general_chatbot import general_chat
 from db.connect import db
 
 user_files = db["user_files"]
@@ -36,14 +38,16 @@ async def router_based_chat(user_id: str, user_query: str):
         if src == 'db':
             if len(db_url.strip()) == 0:
                 raise Exception("db URL not found")
-            
             res =  await db_chat(db_url, db_schema, user_query)
             res_type = 'json'
         elif src == 'csv':
-            # res = await 
+            res = await csv_chat(user_query, csv_urls, csv_schema)
+            res = res["result"]
             res_type = 'json'
-        else:
+        elif src == 'rag':
             res = await rag_chat(user_id, user_query)
+        else:
+            res = await general_chat(user_query)
         
         return JSONResponse(status_code=200,content={"message": "chat successful", "data": {"res": res, "type": res_type}})
     except Exception as e:

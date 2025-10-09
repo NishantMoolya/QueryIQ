@@ -1,8 +1,6 @@
-import pprint
 import pandas as pd
 import requests
 from io import StringIO, BytesIO
-from services.csv_query_handler import run_query 
 
 # === CSV/Excel Loader from Supabase URLs ===
 def load_file_from_url(url: str, name: str) -> pd.DataFrame | None:
@@ -83,6 +81,6 @@ async def csv_schema():
     }
     results = get_csv_schema(file_urls)
     prompt = "List the top 1 employees with highest salaries in each department."
-    run_query_results = run_query(prompt, results["dataframes"], results["schema"])
+    # run_query_results = csv_chat(prompt, results["dataframes"], results["schema"])
     
-    return run_query_results
+    return "run_query_results"
