@@ -1,13 +1,11 @@
 from fastapi.responses import JSONResponse
 from core.config import settings
-from db.connect import connectDB
+from db.connect import db
 from models.user_auth import UserSignup, UserLogin
 from utils.user_auth import get_password_hash, verify_password, create_access_token
 from bson import ObjectId
 
-db = connectDB()
 users = db["users"]
-user_files = db["files"]
 
 async def user_signup(user: UserSignup):
     try:
@@ -66,22 +64,11 @@ async def user_profile(user_id: str):
         db_user = users.find_one({"_id": ObjectId(user_id)})
         if not db_user:
             return JSONResponse(status_code=404, content={"message": "User not found"})
-        
-        # Convert the cursor to a list and serialize each file
-        user_file_cursor = user_files.find({"user_id": ObjectId(user_id)})
-        user_file_list = []
-        for file in user_file_cursor:
-            file["_id"] = str(file["_id"])
-            file["user_id"] = str(file["user_id"])
-            if "uploaded_at" in file:
-                file["uploaded_at"] = file["uploaded_at"].isoformat() 
-            user_file_list.append(file)
 
         user_data = {
             "name": db_user["username"],
             "email": db_user["email"],
-            "_id": str(db_user["_id"]),
-            "files": user_file_list
+            "_id": str(db_user["_id"])
         }
 
         return JSONResponse(status_code=200, content={"message": "Profile fetched successfully", "data": user_data})

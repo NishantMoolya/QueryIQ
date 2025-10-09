@@ -2,12 +2,15 @@ from pymongo import MongoClient
 from core.config import settings
 
 def connectDB():
-    """
-    Connects to MongoDB running on localhost and returns the client db instance.
-    """
-    client = MongoClient(settings.DB_URL)
-    return client["genpix"]
+    try:
+        if not settings.DB_URL:
+            raise ValueError("DATABASE_URL environment variable not set")
 
-# Example usage:
-# client = get_mongo_client()
-# db = client["your_database_name"]
+        client = MongoClient(settings.DB_URL)
+        print("Connection to the database established successfully.")
+        return client["query_qi"]
+    except Exception as e:
+        print(f"An error occurred: {e} ")
+        return None
+
+db = connectDB()
