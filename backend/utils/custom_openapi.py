@@ -9,9 +9,9 @@ def add_jwt_auth_to_openapi(app: FastAPI):
             return app.openapi_schema
 
         openapi_schema = get_openapi(
-            title="GenPix API",
+            title="QueryIQ API",
             version="1.0.0",
-            description="Transforming books into enhanced visual books",
+            description="NLP Query Engine for Employee Data",
             routes=app.routes,
         )
 

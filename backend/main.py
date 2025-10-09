@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes.files_routes import files_router
 from routes.user_routes import user_router
 from middlewares.auth_middleware import AuthMiddleware
 from utils.custom_openapi import add_jwt_auth_to_openapi
@@ -15,7 +14,8 @@ async def handleHome():
 
 origins = [
     # "http://localhost:5173",
-    "https://genpix.netlify.app",  # Your Netlify frontend
+    # "https://genpix.netlify.app",  # Your Netlify frontend
+    "*"
 ]
 
 # Configure CORS
@@ -31,6 +31,5 @@ app.add_middleware(
 app.add_middleware(AuthMiddleware)
 
 # Include the routers
-app.include_router(files_router, prefix="/api/v1/files", tags=["Upload File"])
 app.include_router(user_router, prefix="/api/v1/user", tags=["User Authentication"])
 
