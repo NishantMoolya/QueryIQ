@@ -34,7 +34,3 @@ app.add_middleware(AuthMiddleware)
 app.include_router(files_router, prefix="/api/v1/files", tags=["Upload File"])
 app.include_router(user_router, prefix="/api/v1/user", tags=["User Authentication"])
 
-# if __name__ == "__main__":
-#     import uvicorn
-#     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
-
