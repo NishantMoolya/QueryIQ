@@ -9,3 +9,5 @@ langchain-huggingface
 openai
 python-multipart
 langchain[google-genai]
+sqlalchemy
+pymysql
