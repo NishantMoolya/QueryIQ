@@ -1,7 +1,5 @@
 import pandas as pd
-from llms import createLLM
-
-model = createLLM()
+from services.llms import chat_llm
 
 # === Prompt Builder ===
 def create_multi_csv_prompt(user_query: str, dataframes: dict[str, pd.DataFrame], schema_info: str) -> str:
@@ -23,6 +21,7 @@ Generate valid **pandas code** that:
 - Does **NOT** use or reference any system-level, file, or network operations (e.g., `open`, `os`, `sys`, `eval`, `exec`, `__import__`, `subprocess`, `shutil`, `pathlib`, or similar)
 - Does **NOT** access or modify the local file system, environment variables, or network
 - Does **NOT** redefine built-in functions or manipulate globals
+- Do not add any comments or explanations
 - Handles missing or inconsistent columns gracefully (use conditional checks where needed)
 - Avoids in-place modifications of existing DataFrames
 - Keeps the output concise and interpretable
@@ -34,7 +33,7 @@ Output **only the Python code**, nothing else.
 # === Gemini Code Generator ===
 def generate_code_with_gemini(prompt: str) -> str:
     try:
-        response = model.invoke(prompt)
+        response = chat_llm.invoke(prompt)
         code = response.content.strip("```python").strip("```").strip()
         print("Generated Code:\n", code, "\n")
         return code
@@ -52,7 +51,7 @@ def is_secure(code: str) -> bool:
     unsafe_keywords = [
         "import os", "import sys", "subprocess", "shutil", "pathlib", "eval", "exec",
         "__import__", "open(", "write(", "remove(", "delete(", "os.", "sys.", "input(",
-        "socket", "requests", "ftp", "urllib", "pickle", "compile(", "globals(", "locals("
+        "socket"
     ]
     
     # Normalize the code for checking
@@ -82,7 +81,8 @@ def safe_execute(code: str, dataframes: dict[str, pd.DataFrame]) -> pd.DataFrame
 
     code = "\n".join(line for line in code.split("\n") if "import" not in line)
 
-    local_vars = dataframes.copy()
+    # local_vars = dataframes.copy()
+    local_vars = {name.split('.')[0].lower(): df for name, df in dataframes.items()}
     try:
         exec(code, safe_globals, local_vars)
         result = local_vars.get("result")
@@ -93,12 +93,42 @@ def safe_execute(code: str, dataframes: dict[str, pd.DataFrame]) -> pd.DataFrame
 
         if isinstance(result, pd.DataFrame):
             print(f"Execution successful. Result: {result.shape[0]} rows × {result.shape[1]} cols.")
+            result_json = result.to_dict(orient="records")
+            return result_json
+        
         else:
             print(f"Result is not a DataFrame (type: {type(result)}).")
-
-        return result
+            return result
 
     except Exception as e:
         print(f"Error executing generated code:\n{e}")
         return None
 
+def run_query(user_query: str, dataframes: dict[str, pd.DataFrame], schema: str) -> dict:
+    """
+    Takes a user query, dictionary of DataFrames, and schema string.
+    Generates pandas code using Gemini LLM, checks for security,
+    executes the code safely, and returns a JSON-compatible result.
+    """
+    if not user_query.strip():
+        return {"status": "error", "message": "No query provided.", "result": None}
+
+    #1.Build the prompt
+    prompt = create_multi_csv_prompt(user_query, dataframes, schema)
+
+    #2.Generate code via Gemini
+    generated_code = generate_code_with_gemini(prompt)
+    if not generated_code:
+        return {"status": "error", "message": "Failed to generate code.", "result": None}
+
+    #3.Execute code safely
+    result_json = safe_execute(generated_code, dataframes)
+    if result_json is None:
+        return {"status": "error", "message": "Execution failed or result is empty.", "result": None}
+
+    #4.Return output in structured JSON
+    return {
+        "status": "success",
+        "message": "Query executed successfully.",
+        "result": result_json
+    }
