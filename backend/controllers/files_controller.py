@@ -122,3 +122,26 @@ async def add_files(user_id: str, files: List[FilePayload]):
             content={"message": f"An unexpected error occurred: {str(e)}"}
         )
         
+async def get_files(user_id: str):
+    try:
+        # Fetch all files for this user
+        res = list(user_files.find({"user_id": user_id}))
+
+        # Convert ObjectId to string for JSON serialization
+        for file in res:
+            file["_id"] = str(file["_id"])
+
+        return JSONResponse(
+            status_code=200,
+            content={
+                "message": "Files fetched successfully",
+                "data": res
+            }
+        )
+
+    except Exception as e:
+        print(f"An unexpected error occurred: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"message": f"An unexpected error occurred: {str(e)}"}
+        )
