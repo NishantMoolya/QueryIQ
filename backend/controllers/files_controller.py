@@ -7,6 +7,8 @@ from services.text_extractor import text_extractor
 from services.vector_store import store_in_vectorstore
 from langchain_core.documents import Document
 from models.files_models import FilePayload
+from services.fetch_tables_and_schemas_sqlalchemy import fetch_tables_and_schemas_sqlalchemy
+from services.csv_schema_loader import get_csv_schema
 
 user_files = db["user_files"]
 
@@ -42,7 +44,8 @@ async def upload_files(user_id: str, files: List[UploadFile]):
                 "file_name": file.filename,
                 "file_type": file.content_type,
                 "file_url": None,
-                "uploaded_at": str(datetime.datetime.now())
+                "uploaded_at": str(datetime.datetime.now()),
+                "schema": ""
             }
 
             # Insert and capture the inserted ID
@@ -77,20 +80,33 @@ async def upload_files(user_id: str, files: List[UploadFile]):
 async def add_files(user_id: str, files: List[FilePayload]):
     try:
         files_info = []
+        
         for file in files:
+            schema = ""
+            if file.file_type == 'db':
+                schema = str(fetch_tables_and_schemas_sqlalchemy(file.file_url))
+            elif file.file_type == 'csv':
+                schema_dict = {}
+                schema_dict[file.file_name] = file.file_url
+                schema = get_csv_schema(schema_dict)
+            
             file_data = {
                 "user_id": user_id,
                 "file_name": file.file_name,
                 "file_type": file.file_type,
                 "file_url": file.file_url,
-                "uploaded_at": str(datetime.datetime.now())
+                "uploaded_at": str(datetime.datetime.now()),
+                "schema": schema
             }
 
+            print(f"schemas: {schema}")
+            
             # Insert and capture the inserted ID
             result = user_files.insert_one(file_data)
             file_data["_id"] = str(result.inserted_id)
             files_info.append(file_data)
             
+         
         return JSONResponse(
             status_code=201,
             content={

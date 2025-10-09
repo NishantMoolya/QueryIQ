@@ -65,17 +65,6 @@ def build_schema_description(dataframes: dict[str, pd.DataFrame]) -> str:
 
 # === Helper function to return schema as string ===
 def get_csv_schema(file_urls: dict[str, str]) -> str:
-    """
-    Given a dictionary of file names → Supabase URLs,
-        Load multiple CSV or Excel files from Supabase URLs.
-        Example:
-        {
-            "employee": "https://xyz.supabase.co/storage/v1/object/public/data/employee.csv",
-            "salaries": "https://xyz.supabase.co/storage/v1/object/public/data/salaries.xlsx"
-        }
-
-    loads the files and returns a combined schema description string.
-    """
     dataframes = load_all_files_from_supabase(file_urls)
     if not dataframes:
         return {
@@ -83,10 +72,7 @@ def get_csv_schema(file_urls: dict[str, str]) -> str:
             "dataframes": {}
         }
     schema_str = build_schema_description(dataframes)
-    return {
-        "schema": schema_str,
-        "dataframes": dataframes
-    }
+    return schema_str
 
 async def csv_schema():
     file_urls = {

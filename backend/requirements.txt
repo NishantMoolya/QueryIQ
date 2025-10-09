@@ -12,3 +12,4 @@ langchain[google-genai]
 sqlalchemy
 pymysql
 langchain_mongodb
+psycopg2
