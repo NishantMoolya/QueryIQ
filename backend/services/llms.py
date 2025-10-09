@@ -1,4 +1,9 @@
 from langchain.chat_models import init_chat_model
+import os
+from core.config import settings
+
+if not os.environ.get("GOOGLE_API_KEY"):
+  os.environ["GOOGLE_API_KEY"] = settings.GOOGLE_API_KEY
 
 def createLLM(): 
     try:        
@@ -8,3 +13,5 @@ def createLLM():
     except Exception as e:
         print(f"LLM Initialization failed {str(e)}")
         return None
+
+chat_llm = createLLM()
