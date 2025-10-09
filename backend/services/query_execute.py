@@ -20,3 +20,4 @@ def execute_query_sqlalchemy(engine: Engine, sql_query: str):
             return rows
         except Exception as e:
             print("❌ Error:", e)
+            return "Error"
