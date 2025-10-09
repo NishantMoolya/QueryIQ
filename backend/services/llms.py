@@ -1,18 +1,8 @@
-from langchain_huggingface import HuggingFaceEndpoint,ChatHuggingFace
-from core.config import settings
+from langchain.chat_models import init_chat_model
 
 def createLLM(): 
-    try:
-        llm = HuggingFaceEndpoint(
-            repo_id=settings.REPO_ID,
-            task="conversational",
-            max_new_tokens=512,
-            do_sample=False,
-            repetition_penalty=1.03,
-            huggingfacehub_api_token=settings.HF_TOKEN
-        )
-        
-        chat_llm = ChatHuggingFace(llm=llm, verbose=True)
+    try:        
+        chat_llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
         print("LLM Initialized")
         return chat_llm
     except Exception as e:
