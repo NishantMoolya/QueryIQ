@@ -3,7 +3,7 @@ from services.build_schema import build_schema_prompt
 
 # llm = createLLM()
 
-def nl_to_sql_with_dynamic_schema(prompt: str, schemas: dict) -> str:
+def nl_to_sql_with_dynamic_schema(prompt: str, schemas: str) -> str:
     """
     Generate SQL from natural language query using langchain Gemini model,
     providing all table schemas dynamically in the prompt.
@@ -11,15 +11,14 @@ def nl_to_sql_with_dynamic_schema(prompt: str, schemas: dict) -> str:
     if chat_llm is None:
         raise RuntimeError("LLM initialization failed")
 
-    schema_prompt = build_schema_prompt(schemas)
     full_prompt = f"""
-You are an expert SQL query generator. Here are the table schemas:
-{schema_prompt}
+        You are an expert SQL query generator. Here are the table schemas:
+        {schemas}
 
-User request: {prompt}
+        User request: {prompt}
 
-Only output valid SQL queries using the relevant table(s).
-"""
+        Only output valid SQL queries using the relevant table(s).
+    """
 
     # Call LLM -> adjust this based on langchain's chat_llm interface
     # Assuming it has a '__call__' interface that accepts a string prompt

@@ -1,8 +1,9 @@
 import pandas as pd
 from services.llms import chat_llm
+from services.csv_schema_loader import load_all_files_from_supabase
 
 # === Prompt Builder ===
-def create_multi_csv_prompt(user_query: str, dataframes: dict[str, pd.DataFrame], schema_info: str) -> str:
+def create_multi_csv_prompt(user_query: str, schema_info: str) -> str:
     # schema_info = build_schema_description(dataframes)
     return f"""
 You are an expert Python data analyst. You have access to multiple CSV files loaded as pandas DataFrames.
@@ -104,7 +105,7 @@ def safe_execute(code: str, dataframes: dict[str, pd.DataFrame]) -> pd.DataFrame
         print(f"Error executing generated code:\n{e}")
         return None
 
-def run_query(user_query: str, dataframes: dict[str, pd.DataFrame], schema: str) -> dict:
+async def csv_chat(user_query: str, files: dict[str, str], schemas: str) -> dict:
     """
     Takes a user query, dictionary of DataFrames, and schema string.
     Generates pandas code using Gemini LLM, checks for security,
@@ -112,9 +113,10 @@ def run_query(user_query: str, dataframes: dict[str, pd.DataFrame], schema: str)
     """
     if not user_query.strip():
         return {"status": "error", "message": "No query provided.", "result": None}
-
+    
+    dataframes = load_all_files_from_supabase(files)
     #1.Build the prompt
-    prompt = create_multi_csv_prompt(user_query, dataframes, schema)
+    prompt = create_multi_csv_prompt(user_query, schemas)
 
     #2.Generate code via Gemini
     generated_code = generate_code_with_gemini(prompt)

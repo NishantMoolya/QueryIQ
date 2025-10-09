@@ -14,9 +14,9 @@ async def router_chat(query: str, db_schema: str, csv_schema: str):
         chain = router_prompt_template | chain_output
         
         chat_response = await chain.ainvoke({ "query": query, "db_schema": db_schema, "csv_schema": csv_schema })
-        print(f"chatbot response: {len(chat_response)}, {chat_response}")
+        print(f"chatbot response: {chat_response}")
         
-        return chat_response
+        return chat_response.source
     except Exception as e:
         print(f"an error: {str(e)}")
         return ""
