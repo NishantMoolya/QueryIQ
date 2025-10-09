@@ -1,13 +1,11 @@
 from langchain_core.output_parsers import StrOutputParser
 from pydantic import BaseModel, Field
+from typing import Literal
 
-output_parser = StrOutputParser()
+str_output_parser = StrOutputParser()    
 
-class SummarizerOutput(BaseModel):
-    summary: str = Field(default="", description="contains the summary of the provided text input")
-    
-
-class ImageDesignerOutput(BaseModel):
-    img_prompt: str
+class RouterOutputParser(BaseModel):
+    """Always use this tool to structure your response to the user."""
+    source: Literal["rag", "db", "csv"] = Field(description="contains source of information")
     
 

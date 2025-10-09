@@ -8,3 +8,8 @@ langchain-community
 langchain-huggingface
 openai
 python-multipart
+langchain[google-genai]
+sqlalchemy
+pymysql
+langchain_mongodb
+psycopg2
