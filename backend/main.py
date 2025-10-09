@@ -34,4 +34,3 @@ app.add_middleware(AuthMiddleware)
 # Include the routers
 app.include_router(user_router, prefix="/api/v1/user", tags=["User Authentication"])
 app.include_router(files_router, prefix="/api/v1/file", tags=["File Uploads"])
-
