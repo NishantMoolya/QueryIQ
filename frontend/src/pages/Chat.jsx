@@ -62,86 +62,30 @@ const Chat = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
 
+  const fetchFiles = async () => {
+    try {
+      const res = await axiosInstance.get('/file/');
+      console.log("res", res);
+      const main_data = res.data.data.filter(file => {
+        if(file.file_type === "db") {
+          console.log("h");
+        } else return file;
+      })
+      setDocuments(main_data);
+    } catch (err) {
+      console.log("err", err);
+    }
+  }
+
   // Fetch documents on mount
   useEffect(() => {
-    // const uploadedDocs = [
-      // {
-      //   id: 1,
-      //   name: "Sales Report Q1.pdf",
-      //   thumbnail: null,
-      //   type: "pdf",
-      //   size: "2.4 MB",
-      // },
-      // {
-      //   id: 2,
-      //   name: "Customer Data.xlsx",
-      //   thumbnail: null,
-      //   type: "excel",
-      //   size: "1.8 MB",
-      // },
-      // {
-      //   id: 3,
-      //   name: "Project Proposal.docx",
-      //   thumbnail: null,
-      //   type: "doc",
-      //   size: "3.1 MB",
-      // },
-    // ];
-    // setDocuments(uploadedDocs);
+    fetchFiles();
   }, []);
 
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  // Send chat message
-  // const sendChat = async () => {
-  //   if (!chatInput.trim()) return;
-
-  //   if (!isDbConnected && documents.length === 0) {
-  //     alert("Please connect a database or upload documents first");
-  //     return;
-  //   }
-
-  //   const newMessage = {
-  //     role: "user",
-  //     type: "str",
-  //     content: chatInput,
-  //     timestamp: new Date(),
-  //   };
-  //   setMessages((prev) => [...prev, newMessage]);
-  //   setChatInput("");
-  //   setIsTyping(true);
-
-  //   try {
-  //     const res = await axiosInstance.post("/chat/answer", {
-  //       query: chatInput,
-  //     });
-  //     console.log("This is res  data :)"+res);
-  //     console.log(res.data.data.res);
-  //     const aiResponse = {
-  //       role: "assistant",
-  //       content: res.data.data.res || "No response from the server.",
-  //       timestamp: new Date(),
-  //     };
-   
-  //   //  console.log(JSON.stringify(res,2));
-  //     setMessages((prev) => [...prev, aiResponse]);
-  //   } catch (err) {
-  //     console.error("Chat API error:", err.message);
-
-  //     const errorMsg = {
-  //       role: "assistant",
-  //       content: "Sorry, I could not get a response. Please try again.",
-  //       timestamp: new Date(),
-  //     };
-
-  //     setMessages((prev) => [...prev, errorMsg]);
-  //   } finally {
-  //     setIsTyping(false);
-  //   }
-  // };
 
 
   // Send chat message
@@ -162,22 +106,7 @@ const Chat = () => {
     setMessages((prev) => [...prev, newMessage]);
     setChatInput("");
     setIsTyping(true);
-
-    // try {
-    //   const res = await axiosInstance.post("/chat/answer", {
-    //     query: chatInput,
-    //   });
-    //   console.log("This data comes from the llm" + res?.data?.data.res);
-    //   const aiResponse = {
-    //     role: "assistant",
-    //     content: res?.data?.data.res || "No response from the server.",
-    //     timestamp: new Date(),
-    //     type: res?.data?.data.type 
-    //   };
-
-    //   setMessages((prev) => [...prev, aiResponse]);
-    // } 
-    
+ 
 try {
   const res = await axiosInstance.post('/chat/answer', {
     query: chatInput,
@@ -424,21 +353,21 @@ try {
             <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
               Documents
             </h3>
-            <Button
+            {/* <Button
               onClick={() => setOpenUpload(true)}
               className="p-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-200"
             >
               <Plus className="w-4 h-4" />
-            </Button>
+            </Button> */}
           </div>
 
           <div className="space-y-3">
             {documents.map((doc) => (
               <Card
-                key={doc.id}
-                onClick={() => setSelectedDocument(doc)}
+                key={doc._id}
+                // onClick={() => setSelectedDocument(doc)}
                 className={`group cursor-pointer relative overflow-hidden bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-xl border transition-all duration-300 hover:scale-[1.02] ${
-                  selectedDocument?.id === doc.id
+                  selectedDocument?._id !== doc._id
                     ? "border-white/40 shadow-lg shadow-white/10"
                     : "border-white/10 hover:border-white/20"
                 }`}
@@ -446,17 +375,17 @@ try {
                 <div className="p-3">
                   <div className="flex items-start gap-3">
                     <div className="text-2xl flex-shrink-0">
-                      {getFileIcon(doc.type)}
+                      {getFileIcon(doc.file_type)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-white truncate">
-                        {doc.name}
+                        {doc.file_name}
                       </p>
-                      <p className="text-xs text-gray-400 mt-0.5">{doc.size}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{1.5}</p>
                     </div>
                   </div>
                 </div>
-                {selectedDocument?.id === doc.id && (
+                {selectedDocument?._id === doc._id && (
                   <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-white"></div>
                 )}
               </Card>
