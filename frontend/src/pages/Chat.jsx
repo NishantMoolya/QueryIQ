@@ -31,7 +31,6 @@ const Chat = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   // Database state
-  const [dbUrl] = useState("mongodb://localhost:27017/mydb");
   const [isDbConnected] = useState(true);
 
   // Documents state
@@ -46,6 +45,14 @@ const Chat = () => {
       content:
         "Hello! I can help you query your database or analyze documents. What would you like to know?",
       timestamp: new Date(),
+      type: "str"
+    },
+    {
+      role: "assistant",
+      content:
+        "Hello! I can help you query your database or analyze documents. What would you like to know?",
+      timestamp: new Date(),
+      type: "str"
     },
   ]);
   const [isTyping, setIsTyping] = useState(false);
@@ -57,30 +64,30 @@ const Chat = () => {
 
   // Fetch documents on mount
   useEffect(() => {
-    const uploadedDocs = [
-      {
-        id: 1,
-        name: "Sales Report Q1.pdf",
-        thumbnail: null,
-        type: "pdf",
-        size: "2.4 MB",
-      },
-      {
-        id: 2,
-        name: "Customer Data.xlsx",
-        thumbnail: null,
-        type: "excel",
-        size: "1.8 MB",
-      },
-      {
-        id: 3,
-        name: "Project Proposal.docx",
-        thumbnail: null,
-        type: "doc",
-        size: "3.1 MB",
-      },
-    ];
-    setDocuments(uploadedDocs);
+    // const uploadedDocs = [
+      // {
+      //   id: 1,
+      //   name: "Sales Report Q1.pdf",
+      //   thumbnail: null,
+      //   type: "pdf",
+      //   size: "2.4 MB",
+      // },
+      // {
+      //   id: 2,
+      //   name: "Customer Data.xlsx",
+      //   thumbnail: null,
+      //   type: "excel",
+      //   size: "1.8 MB",
+      // },
+      // {
+      //   id: 3,
+      //   name: "Project Proposal.docx",
+      //   thumbnail: null,
+      //   type: "doc",
+      //   size: "3.1 MB",
+      // },
+    // ];
+    // setDocuments(uploadedDocs);
   }, []);
 
   // Auto-scroll to bottom
@@ -89,8 +96,57 @@ const Chat = () => {
   }, [messages]);
 
   // Send chat message
+  // const sendChat = async () => {
+  //   if (!chatInput.trim()) return;
+
+  //   if (!isDbConnected && documents.length === 0) {
+  //     alert("Please connect a database or upload documents first");
+  //     return;
+  //   }
+
+  //   const newMessage = {
+  //     role: "user",
+  //     type: "str",
+  //     content: chatInput,
+  //     timestamp: new Date(),
+  //   };
+  //   setMessages((prev) => [...prev, newMessage]);
+  //   setChatInput("");
+  //   setIsTyping(true);
+
+  //   try {
+  //     const res = await axiosInstance.post("/chat/answer", {
+  //       query: chatInput,
+  //     });
+  //     console.log("This is res  data :)"+res);
+  //     console.log(res.data.data.res);
+  //     const aiResponse = {
+  //       role: "assistant",
+  //       content: res.data.data.res || "No response from the server.",
+  //       timestamp: new Date(),
+  //     };
+   
+  //   //  console.log(JSON.stringify(res,2));
+  //     setMessages((prev) => [...prev, aiResponse]);
+  //   } catch (err) {
+  //     console.error("Chat API error:", err.message);
+
+  //     const errorMsg = {
+  //       role: "assistant",
+  //       content: "Sorry, I could not get a response. Please try again.",
+  //       timestamp: new Date(),
+  //     };
+
+  //     setMessages((prev) => [...prev, errorMsg]);
+  //   } finally {
+  //     setIsTyping(false);
+  //   }
+  // };
+
+
+  // Send chat message
   const sendChat = async () => {
-    if (!chatInput.trim()) return;
+    if (chatInput.trim().length === 0) return;
 
     if (!isDbConnected && documents.length === 0) {
       alert("Please connect a database or upload documents first");
@@ -101,37 +157,129 @@ const Chat = () => {
       role: "user",
       content: chatInput,
       timestamp: new Date(),
+      type:'str'
     };
     setMessages((prev) => [...prev, newMessage]);
     setChatInput("");
     setIsTyping(true);
 
+    // try {
+    //   const res = await axiosInstance.post("/chat/answer", {
+    //     query: chatInput,
+    //   });
+    //   console.log("This data comes from the llm" + res?.data?.data.res);
+    //   const aiResponse = {
+    //     role: "assistant",
+    //     content: res?.data?.data.res || "No response from the server.",
+    //     timestamp: new Date(),
+    //     type: res?.data?.data.type 
+    //   };
+
+    //   setMessages((prev) => [...prev, aiResponse]);
+    // } 
+    
+try {
+  const res = await axiosInstance.post('/chat/answer', {
+    query: chatInput,
+  });
+
+  const responseData = res?.data?.data;
+  const responseType = responseData?.type || 'str';
+  const responseContent = responseData?.res;
+
+  console.log('This data comes from the LLM:', responseContent);
+
+  let formattedContent = responseContent;
+  console.log("type is here"+ responseType)
+ if (responseType === 'json') {
+  let jsonData = responseContent;
+
+  // Parse JSON string if needed
+  if (typeof responseContent === 'string') {
     try {
-      const res = await axiosInstance.post("/chat/answer", {
-        query: chatInput,
-      });
-      console.log(res.data.res);
-      const aiResponse = {
-        role: "assistant",
-        content: res.data.res || "No response from the server.",
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, aiResponse]);
+      jsonData = JSON.parse(responseContent);
     } catch (err) {
-      console.error("Chat API error:", err.message);
-
-      const errorMsg = {
-        role: "assistant",
-        content: "Sorry, I could not get a response. Please try again.",
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, errorMsg]);
-    } finally {
-      setIsTyping(false);
+      console.error("Failed to parse JSON string:", err);
+      jsonData = null;
     }
+  }
+
+  // Handle array of objects
+  if (Array.isArray(jsonData)) {
+    if (jsonData.length > 0) {
+      const keys = Object.keys(jsonData[0]);
+      formattedContent = `
+        <table style="border-collapse: collapse; width: 100%;">
+          <thead>
+            <tr style="background-color: #f5f5f5;">
+              ${keys.map(key => `<th style="border: 1px solid #ccc; padding: 6px; text-align: left;">${key}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${jsonData.map(row => `
+              <tr>
+                ${keys.map(key => `<td style="border: 1px solid #ccc; padding: 6px;">${row[key]}</td>`).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    } else {
+      formattedContent = "<p>No data available</p>";
+    }
+  }
+
+  // Handle single object
+  else if (jsonData && typeof jsonData === 'object') {
+    const entries = Object.entries(jsonData);
+    formattedContent = `
+      <table style="border-collapse: collapse; width: 100%;">
+        <thead>
+          <tr style="background-color: #f5f5f5;">
+            <th style="border: 1px solid #ccc; padding: 6px; text-align: left;">Key</th>
+            <th style="border: 1px solid #ccc; padding: 6px; text-align: left;">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${entries
+            .map(
+              ([key, value]) => `
+                <tr>
+                  <td style="border: 1px solid #ccc; padding: 6px;">${key}</td>
+                  <td style="border: 1px solid #ccc; padding: 6px;">${JSON.stringify(value)}</td>
+                </tr>
+              `
+            )
+            .join('')}
+        </tbody>
+      </table>
+    `;
+  }
+}
+
+  const aiResponse = {
+    role: 'assistant',
+    content: formattedContent || 'No response from the server.',
+    timestamp: new Date(),
+    type: responseType,
   };
+
+  setMessages((prev) => [...prev, aiResponse]);
+} catch (err) {
+  console.error("Chat API error:", err.message);
+
+  const errorMsg = {
+    role: "assistant",
+    content: "Sorry, I could not get a response. Please try again.",
+    timestamp: new Date(),
+    type: "str",
+  };
+
+  setMessages((prev) => [...prev, errorMsg]);
+} finally {
+  setIsTyping(false);
+}
+}
 
   // Handle Enter key
   const handleKeyPress = (e) => {
@@ -366,6 +514,7 @@ const Chat = () => {
         </div>
 
         {/* Messages Container */}
+        {/* Messages Container */}
         <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 custom-scrollbar">
           <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
             {messages.map((msg, idx) => (
@@ -373,9 +522,9 @@ const Chat = () => {
                 key={idx}
                 className={`flex gap-2 sm:gap-3 md:gap-4 ${
                   msg.role === "user" ? "flex-row-reverse" : "flex-row"
-                } ${msg.role === "system" ? "justify-center" : ""}`}
+                } ${msg.role === "assistant" ? "justify-center" : ""}`}
               >
-                {msg.role !== "system" && (
+                {msg.role !== "assistant" && (
                   <div
                     className={`flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center ${
                       msg.role === "user"
@@ -393,20 +542,30 @@ const Chat = () => {
 
                 <div
                   className={`${
-                    msg.role === "system"
+                    msg.role === "assistant"
                       ? "flex justify-center"
                       : msg.role === "user"
                       ? "flex justify-end"
                       : "flex justify-start"
-                  } ${msg.role === "system" ? "w-full" : "flex-1 min-w-0"}`}
+                  } ${msg.role === "assistant" ? "w-full" : "flex-1 min-w-0"}`}
                 >
-                  {msg.role === "system" ? (
-                    <div className="text-center">
-                      <span className="inline-block bg-white/5 border border-white/10 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-xs text-gray-400">
-                        {msg.content}
-                      </span>
-                    </div>
-                  ) : (
+                  {msg.role === "assistant" ? (
+  <div className="text-center">
+    {msg.type === "json" ? (
+      // render HTML (table)
+      <div
+        className="inline-block bg-white/5 border border-white/10 px-3 sm:px-4 py-2 sm:py-3 rounded-xl text-[10px] sm:text-sm text-gray-300 overflow-x-auto"
+        dangerouslySetInnerHTML={{ __html: msg.content }}
+      />
+    ) : (
+      // render normal text response
+      <span className="inline-block bg-white/5 border border-white/10 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-xs text-gray-400">
+        {msg.content}
+      </span>
+    )}
+  </div>
+) : (
+
                     <div
                       className={`inline-block max-w-[85%] sm:max-w-[80%] md:max-w-[75%] lg:max-w-[70%] rounded-2xl px-3 sm:px-4 md:px-5 py-2.5 sm:py-3 md:py-3.5 ${
                         msg.role === "user"

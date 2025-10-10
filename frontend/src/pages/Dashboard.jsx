@@ -22,12 +22,16 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/lib/supabaseClient";
 import axiosInstance from "@/api/axios";
+import { useDispatch, useSelector } from "react-redux";
+import { updateDB } from "@/redux/reducers/userReducer";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const user = useSelector(state => state.user);
 
   // State for database URL input
-  const [dbUrl, setDbUrl] = useState("");
+  const [dbUrl, setDbUrl] = useState(user.db_url);
   const [isConnecting, setIsConnecting] = useState(false);
 
   // State for user's uploaded documents
@@ -38,45 +42,40 @@ const Dashboard = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
 
+  const fetchFiles = async () => {
+    try {
+      const res = await axiosInstance.get('file');
+      console.log("res", res);
+    } catch (err) {
+      console.log("err", err);
+    }
+  }
   // Fetch previously uploaded documents on component mount
   useEffect(() => {
-    // Mock data for demonstration
-    const uploadedDocs = [
-      {
-        id: 1,
-        name: "Sales Report Q1.pdf",
-        thumbnail: null,
-        type: "pdf",
-        size: "2.4 MB",
-      },
-      {
-        id: 2,
-        name: "Customer Data.xlsx",
-        thumbnail: null,
-        type: "excel",
-        size: "1.8 MB",
-      },
-      {
-        id: 3,
-        name: "Project Proposal.docx",
-        thumbnail: null,
-        type: "doc",
-        size: "3.1 MB",
-      },
-    ];
-    setDocuments(uploadedDocs);
+    fetchFiles();
   }, []);
 
   // Handle database connection
   const connectDatabase = async () => {
-    if (dbUrl) {
-      setIsConnecting(true);
-      console.log("Connecting to database:", dbUrl);
-      setTimeout(() => {
-        setIsConnecting(false);
-        setDbUrl("");
-        alert("Database connected successfully!");
-      }, 1500);
+    try {
+      if (dbUrl) {
+        setIsConnecting(true);
+        console.log("Connecting to database:", dbUrl);
+        const payload = {
+          file_name: "sample_db",
+          file_url: dbUrl,
+          file_type: "db"
+        }
+        const res = await axiosInstance.post('/file/add', payload);
+        if(res.status === 201) {
+          alert("Database Connected");
+          dispatch(updateDB(dbUrl));
+        } else {
+          alert("Database not connected");
+        }
+      }
+     } catch (err) {
+      console.log("error", err);
     }
   };
 
@@ -135,6 +134,8 @@ const Dashboard = () => {
               cacheControl: "3600",
               upsert: false,
             });
+            console.log(data);
+            
 
           if (error) {
             console.error("Supabase upload error:", error.message);
