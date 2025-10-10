@@ -45,14 +45,14 @@ const Chat = () => {
       content:
         "Hello! I can help you query your database or analyze documents. What would you like to know?",
       timestamp: new Date(),
-      type: "str"
+      type: "str",
     },
     {
-      role: "assistant",
+      role: "user",
       content:
         "Hello! I can help you query your database or analyze documents. What would you like to know?",
       timestamp: new Date(),
-      type: "str"
+      type: "str",
     },
   ]);
   const [isTyping, setIsTyping] = useState(false);
@@ -64,18 +64,18 @@ const Chat = () => {
 
   const fetchFiles = async () => {
     try {
-      const res = await axiosInstance.get('/file/');
+      const res = await axiosInstance.get("/file/");
       console.log("res", res);
-      const main_data = res.data.data.filter(file => {
-        if(file.file_type === "db") {
+      const main_data = res.data.data.filter((file) => {
+        if (file.file_type === "db") {
           console.log("h");
         } else return file;
-      })
+      });
       setDocuments(main_data);
     } catch (err) {
       console.log("err", err);
     }
-  }
+  };
 
   // Fetch documents on mount
   useEffect(() => {
@@ -86,7 +86,6 @@ const Chat = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
 
   // Send chat message
   const sendChat = async () => {
@@ -101,114 +100,220 @@ const Chat = () => {
       role: "user",
       content: chatInput,
       timestamp: new Date(),
-      type:'str'
+      type: "str",
     };
     setMessages((prev) => [...prev, newMessage]);
     setChatInput("");
     setIsTyping(true);
- 
-try {
-  const res = await axiosInstance.post('/chat/answer', {
-    query: chatInput,
-  });
 
-  const responseData = res?.data?.data;
-  const responseType = responseData?.type || 'str';
-  const responseContent = responseData?.res;
-
-  console.log('This data comes from the LLM:', responseContent);
-
-  let formattedContent = responseContent;
-  console.log("type is here"+ responseType)
- if (responseType === 'json') {
-  let jsonData = responseContent;
-
-  // Parse JSON string if needed
-  if (typeof responseContent === 'string') {
     try {
-      jsonData = JSON.parse(responseContent);
-    } catch (err) {
-      console.error("Failed to parse JSON string:", err);
-      jsonData = null;
-    }
-  }
+      const res = await axiosInstance.post("/chat/answer", {
+        query: chatInput,
+      });
 
-  // Handle array of objects
-  if (Array.isArray(jsonData)) {
-    if (jsonData.length > 0) {
-      const keys = Object.keys(jsonData[0]);
-      formattedContent = `
-        <table style="border-collapse: collapse; width: 100%;">
+      const responseData = res?.data?.data;
+      const responseType = responseData?.type || "str";
+      const responseContent = responseData?.res;
+
+      console.log("This data comes from the LLM:", responseContent);
+
+      let formattedContent = responseContent;
+      console.log("type is here" + responseType);
+      if (responseType === "json") {
+        let jsonData = responseContent;
+
+        // Parse JSON string if needed
+        if (typeof responseContent === "string") {
+          try {
+            jsonData = JSON.parse(responseContent);
+          } catch (err) {
+            console.error("Failed to parse JSON string:", err);
+            jsonData = null;
+          }
+        }
+
+        // Handle array of objects
+        if (Array.isArray(jsonData)) {
+          if (jsonData.length > 0) {
+            const keys = Object.keys(jsonData[0]);
+      //       formattedContent = `
+      //   <table style="border-collapse: collapse; width: 100%;">
+      //     <thead>
+      //       <tr style="background-color: #00000;">
+      //         ${keys
+      //           .map(
+      //             (key) =>
+      //               `<th style="border: 1px solid #ccc; padding: 6px; text-align: left;">${key}</th>`
+      //           )
+      //           .join("")}
+      //       </tr>
+      //     </thead>
+      //     <tbody>
+      //       ${jsonData
+      //         .map(
+      //           (row) => `
+      //         <tr>
+      //           ${keys
+      //             .map(
+      //               (key) =>
+      //                 `<td style="border: 1px solid #ccc; padding: 6px;">${row[key]}</td>`
+      //             )
+      //             .join("")}
+      //         </tr>
+      //       `
+      //         )
+      //         .join("")}
+      //     </tbody>
+      //   </table>
+      // `;
+          formattedContent = `
+          <table style="
+            border-collapse: collapse; 
+            width: 100%; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #f0f0f0;
+            background-color: #1e1e2f;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            border-radius: 8px;
+            overflow: hidden;
+          ">
+            <thead>
+              <tr style="background-color: #2c2c3d; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px;">
+                ${keys
+                  .map(
+                    (key) =>
+                      `<th style="
+                        padding: 10px 12px; 
+                        text-align: left; 
+                        border-bottom: 2px solid #444;
+                      ">${key}</th>`
+                  )
+                  .join("")}
+              </tr>
+            </thead>
+            <tbody>
+              ${jsonData
+                .map(
+                  (row, i) => `
+                <tr style="
+                  background-color: ${i % 2 === 0 ? '#262636' : '#1e1e2f'};
+                  transition: background 0.3s;
+                ">
+                  ${keys
+                    .map(
+                      (key) =>
+                        `<td style="
+                          padding: 8px 12px; 
+                          border-bottom: 1px solid #333;
+                        ">${row[key]}</td>`
+                    )
+                    .join("")}
+                </tr>
+              `
+                )
+                .join("")}
+            </tbody>
+          </table>
+          `;
+          } else {
+            formattedContent = "<p>No data available</p>";
+          }
+        }
+
+        // Handle single object
+        else if (jsonData && typeof jsonData === "object") {
+          const entries = Object.entries(jsonData);
+    //       formattedContent = `
+    //   <table style="border-collapse: collapse; width: 100%;">
+    //     <thead>
+    //       <tr style="background-color: #f5f5f5;">
+    //         <th style="border: 1px solid #ccc; padding: 6px; text-align: left;">Key</th>
+    //         <th style="border: 1px solid #ccc; padding: 6px; text-align: left;">Value</th>
+    //       </tr>
+    //     </thead>
+    //     <tbody>
+    //       ${entries
+    //         .map(
+    //           ([key, value]) => `
+    //             <tr>
+    //               <td style="border: 1px solid #ccc; padding: 6px;">${key}</td>
+    //               <td style="border: 1px solid #ccc; padding: 6px;">${JSON.stringify(
+    //                 value
+    //               )}</td>
+    //             </tr>
+    //           `
+    //         )
+    //         .join("")}
+    //     </tbody>
+    //   </table>
+    // `;
+            formattedContent = `
+        <table style="
+          border-collapse: collapse;
+          width: 100%;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          color: #f0f0f0;
+          background-color: #1e1e2f;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+          border-radius: 8px;
+          overflow: hidden;
+        ">
           <thead>
-            <tr style="background-color: #f5f5f5;">
-              ${keys.map(key => `<th style="border: 1px solid #ccc; padding: 6px; text-align: left;">${key}</th>`).join('')}
+            <tr style="
+              background-color: #2c2c3d; 
+              text-transform: uppercase; 
+              font-size: 12px; 
+              letter-spacing: 0.5px;
+            ">
+              <th style="padding: 10px 12px; text-align: left; border-bottom: 2px solid #444;">Key</th>
+              <th style="padding: 10px 12px; text-align: left; border-bottom: 2px solid #444;">Value</th>
             </tr>
           </thead>
           <tbody>
-            ${jsonData.map(row => `
-              <tr>
-                ${keys.map(key => `<td style="border: 1px solid #ccc; padding: 6px;">${row[key]}</td>`).join('')}
+            ${entries
+              .map(
+                ([key, value], i) => `
+              <tr style="
+                background-color: ${i % 2 === 0 ? '#262636' : '#1e1e2f'};
+                transition: background 0.3s;
+              ">
+                <td style="padding: 8px 12px; border-bottom: 1px solid #333;">${key}</td>
+                <td style="padding: 8px 12px; border-bottom: 1px solid #333;">${JSON.stringify(
+                  value
+                )}</td>
               </tr>
-            `).join('')}
+            `
+              )
+              .join("")}
           </tbody>
         </table>
-      `;
-    } else {
-      formattedContent = "<p>No data available</p>";
+        `;
+        }
+      }
+
+      const aiResponse = {
+        role: "assistant",
+        content: formattedContent || "No response from the server.",
+        timestamp: new Date(),
+        type: responseType,
+      };
+
+      setMessages((prev) => [...prev, aiResponse]);
+    } catch (err) {
+      console.error("Chat API error:", err.message);
+
+      const errorMsg = {
+        role: "assistant",
+        content: "Sorry, I could not get a response. Please try again.",
+        timestamp: new Date(),
+        type: "str",
+      };
+
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
+      setIsTyping(false);
     }
-  }
-
-  // Handle single object
-  else if (jsonData && typeof jsonData === 'object') {
-    const entries = Object.entries(jsonData);
-    formattedContent = `
-      <table style="border-collapse: collapse; width: 100%;">
-        <thead>
-          <tr style="background-color: #f5f5f5;">
-            <th style="border: 1px solid #ccc; padding: 6px; text-align: left;">Key</th>
-            <th style="border: 1px solid #ccc; padding: 6px; text-align: left;">Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${entries
-            .map(
-              ([key, value]) => `
-                <tr>
-                  <td style="border: 1px solid #ccc; padding: 6px;">${key}</td>
-                  <td style="border: 1px solid #ccc; padding: 6px;">${JSON.stringify(value)}</td>
-                </tr>
-              `
-            )
-            .join('')}
-        </tbody>
-      </table>
-    `;
-  }
-}
-
-  const aiResponse = {
-    role: 'assistant',
-    content: formattedContent || 'No response from the server.',
-    timestamp: new Date(),
-    type: responseType,
   };
-
-  setMessages((prev) => [...prev, aiResponse]);
-} catch (err) {
-  console.error("Chat API error:", err.message);
-
-  const errorMsg = {
-    role: "assistant",
-    content: "Sorry, I could not get a response. Please try again.",
-    timestamp: new Date(),
-    type: "str",
-  };
-
-  setMessages((prev) => [...prev, errorMsg]);
-} finally {
-  setIsTyping(false);
-}
-}
 
   // Handle Enter key
   const handleKeyPress = (e) => {
@@ -443,7 +548,6 @@ try {
         </div>
 
         {/* Messages Container */}
-        {/* Messages Container */}
         <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 custom-scrollbar">
           <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
             {messages.map((msg, idx) => (
@@ -451,9 +555,9 @@ try {
                 key={idx}
                 className={`flex gap-2 sm:gap-3 md:gap-4 ${
                   msg.role === "user" ? "flex-row-reverse" : "flex-row"
-                } ${msg.role === "assistant" ? "justify-center" : ""}`}
+                } ${msg.role === "assistant" ? "" : ""}`}
               >
-                {msg.role !== "assistant" && (
+                {/* {msg.role !== "assistant" && ( */}
                   <div
                     className={`flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center ${
                       msg.role === "user"
@@ -467,36 +571,49 @@ try {
                       <Bot className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white" />
                     )}
                   </div>
-                )}
+                {/* )} */}
 
                 <div
                   className={`${
                     msg.role === "assistant"
-                      ? "flex justify-center"
+                      ? "flex"
                       : msg.role === "user"
                       ? "flex justify-end"
                       : "flex justify-start"
-                  } ${msg.role === "assistant" ? "w-full" : "flex-1 min-w-0"}`}
+                  } ${msg.role === "assistant" ? "flex-1 min-w-0" : "flex-1 min-w-0"}`}
                 >
                   {msg.role === "assistant" ? (
-  <div className="text-center">
-    {msg.type === "json" ? (
-      // render HTML (table)
-      <div
-        className="inline-block bg-white/5 border border-white/10 px-3 sm:px-4 py-2 sm:py-3 rounded-xl text-[10px] sm:text-sm text-gray-300 overflow-x-auto"
-        dangerouslySetInnerHTML={{ __html: msg.content }}
-      />
-    ) : (
-      // render normal text response
-      <span className="inline-block bg-white/5 border border-white/10 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-xs text-gray-400">
-        {msg.content}
-      </span>
-    )}
-  </div>
-) : (
-
+                    <div className="max-w-[800px]">
+                      {msg.type === "json" ? (
+                        // render HTML (table)
+                        <div
+                          // className="inline-block bg-white/5 border border-white/10 px-3 sm:px-4 py-2 sm:py-3 rounded-xl text-[10px] sm:text-sm text-gray-300 overflow-x-auto"
+                          className="overflow-x-auto text-xs sm:text-sm text-gray-200"
+                          dangerouslySetInnerHTML={{ __html: msg.content }}
+                        />
+                      ) : (
+                        // render normal text response
+                        <div
+                      className={`inline-block max-w-[85%] sm:max-w-[80%] md:max-w-[75%] lg:max-w-[70%] rounded-2xl px-4 sm:px-4 md:px-5 py-4 sm:py-4 md:py-4 ${
+                        msg.role === "user"
+                          ? "bg-gradient-to-r from-white to-gray-100 text-black"
+                          : "bg-gradient-to-br from-white/10 to-white/5 border border-white/10 text-white backdrop-blur-xl"
+                      }`}
+                      style={{
+                        wordWrap: "break-word",
+                        overflowWrap: "break-word",
+                        hyphens: "auto",
+                      }}
+                    >
+                        <p className="text-xs sm:text-sm md:text-base leading-relaxed whitespace-pre-wrap break-words">
+                        {msg.content}
+                        </p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
                     <div
-                      className={`inline-block max-w-[85%] sm:max-w-[80%] md:max-w-[75%] lg:max-w-[70%] rounded-2xl px-3 sm:px-4 md:px-5 py-2.5 sm:py-3 md:py-3.5 ${
+                      className={`inline-block max-w-[85%] sm:max-w-[80%] md:max-w-[75%] lg:max-w-[70%] rounded-2xl px-4 sm:px-4 md:px-5 py-4 sm:py-4 md:py-4 ${
                         msg.role === "user"
                           ? "bg-gradient-to-r from-white to-gray-100 text-black"
                           : "bg-gradient-to-br from-white/10 to-white/5 border border-white/10 text-white backdrop-blur-xl"
@@ -511,7 +628,7 @@ try {
                         {msg.content}
                       </p>
                       <p
-                        className={`text-[10px] sm:text-xs mt-1.5 sm:mt-2 ${
+                        className={`text-[10px] sm:text-xs mt-1.5 sm:mt-2 text-right ${
                           msg.role === "user"
                             ? "text-gray-600"
                             : "text-gray-400"
