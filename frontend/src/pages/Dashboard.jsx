@@ -47,7 +47,7 @@ const Dashboard = () => {
       const res = await axiosInstance.get('/file/');
       console.log("res", res);
       const main_data = res.data.data.filter(file => {
-        if(file.file_type === "db") {
+        if (file.file_type === "db") {
           // dispatch(updateDB(file.file_url));
           setDbUrl(file.file_url);
         } else return file;
@@ -74,14 +74,14 @@ const Dashboard = () => {
           file_type: "db"
         }]
         const res = await axiosInstance.post('/file/add', payload);
-        if(res.status === 201) {
+        if (res.status === 201) {
           alert("Database Connected");
           dispatch(updateDB(dbUrl));
         } else {
           alert("Database not connected");
         }
       }
-     } catch (err) {
+    } catch (err) {
       console.log("error", err);
     } finally {
       setIsConnecting(false);
@@ -143,8 +143,8 @@ const Dashboard = () => {
               cacheControl: "3600",
               upsert: false,
             });
-            console.log(data);
-            
+          console.log(data);
+
 
           if (error) {
             console.error("Supabase upload error:", error.message);
@@ -165,6 +165,24 @@ const Dashboard = () => {
             url: publicData.publicUrl,
             storedIn: "supabase",
           });
+
+          try {
+            const payload = [{
+              file_name: file.name,
+              file_url: publicData.publicUrl,
+              file_type: "csv"
+            }]
+            const res = await axiosInstance.post('/file/add', payload);
+            if (res.status === 201) {
+              console.log("csv uploaded");
+            } else {
+              console.log("csv upload failed");
+            }
+          } catch (err) {
+            console.log("error", err);
+          } finally {
+            setIsConnecting(false);
+          }
         } else if (
           file.type === "application/pdf" ||
           file.name.endsWith(".pdf")
@@ -191,7 +209,7 @@ const Dashboard = () => {
         const formData = new FormData();
         pdfFiles.forEach((pdf) => formData.append("files", pdf));
         console.log("hello");
-        
+
 
         try {
           const res = await axiosInstance.post("/file/upload", formData, {
@@ -269,9 +287,9 @@ const Dashboard = () => {
                   ]}
                   animationSpeed={10}
                   showBorder={false}
-                  // className="font-extrabold"
+                // className="font-extrabold"
                 >
-                   
+
                   Dashboard
                 </GradientText>
               </h1>
@@ -413,11 +431,10 @@ const Dashboard = () => {
           <div className="flex-1 overflow-y-auto custom-scrollbar mt-4 sm:mt-6 space-y-4 sm:space-y-5 pr-2">
             {/* Drag and Drop Zone */}
             <div
-              className={`relative border-2 border-dashed rounded-xl sm:rounded-2xl p-6 sm:p-8 md:p-10 text-center transition-all duration-300 overflow-hidden ${
-                isDragging
+              className={`relative border-2 border-dashed rounded-xl sm:rounded-2xl p-6 sm:p-8 md:p-10 text-center transition-all duration-300 overflow-hidden ${isDragging
                   ? "border-white bg-white/10 scale-[1.02]"
                   : "border-white/20 bg-gradient-to-br from-white/5 to-transparent hover:border-white/40"
-              }`}
+                }`}
               onDragEnter={handleDragEnter}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
@@ -501,8 +518,7 @@ const Dashboard = () => {
             >
               Upload{" "}
               {selectedFiles.length > 0 &&
-                `${selectedFiles.length} file${
-                  selectedFiles.length > 1 ? "s" : ""
+                `${selectedFiles.length} file${selectedFiles.length > 1 ? "s" : ""
                 }`}
             </Button>
           </div>
