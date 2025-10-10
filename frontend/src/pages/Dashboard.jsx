@@ -44,8 +44,15 @@ const Dashboard = () => {
 
   const fetchFiles = async () => {
     try {
-      const res = await axiosInstance.get('file');
+      const res = await axiosInstance.get('/file/');
       console.log("res", res);
+      const main_data = res.data.data.filter(file => {
+        if(file.file_type === "db") {
+          // dispatch(updateDB(file.file_url));
+          setDbUrl(file.file_url);
+        } else return file;
+      })
+      setDocuments(main_data);
     } catch (err) {
       console.log("err", err);
     }
@@ -61,11 +68,11 @@ const Dashboard = () => {
       if (dbUrl) {
         setIsConnecting(true);
         console.log("Connecting to database:", dbUrl);
-        const payload = {
+        const payload = [{
           file_name: "sample_db",
           file_url: dbUrl,
           file_type: "db"
-        }
+        }]
         const res = await axiosInstance.post('/file/add', payload);
         if(res.status === 201) {
           alert("Database Connected");
@@ -76,6 +83,8 @@ const Dashboard = () => {
       }
      } catch (err) {
       console.log("error", err);
+    } finally {
+      setIsConnecting(false);
     }
   };
 
@@ -148,9 +157,9 @@ const Dashboard = () => {
             .getPublicUrl(filePath);
 
           uploadedDocs.push({
-            id: documents.length + uploadedDocs.length + 1,
-            name: file.name,
-            type: file.type,
+            _id: documents.length + uploadedDocs.length + 1,
+            file_name: file.name,
+            file_type: file.type,
             size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
             thumbnail: null,
             url: publicData.publicUrl,
@@ -165,9 +174,9 @@ const Dashboard = () => {
         } else {
           // Discard unsupported file types but still add locally
           uploadedDocs.push({
-            id: documents.length + uploadedDocs.length + 1,
-            name: file.name,
-            type: file.type,
+            _id: documents.length + uploadedDocs.length + 1,
+            file_name: file.name,
+            file_type: file.type,
             size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
             thumbnail: file.type.startsWith("image/")
               ? URL.createObjectURL(file)
@@ -181,6 +190,8 @@ const Dashboard = () => {
       if (pdfFiles.length > 0) {
         const formData = new FormData();
         pdfFiles.forEach((pdf) => formData.append("files", pdf));
+        console.log("hello");
+        
 
         try {
           const res = await axiosInstance.post("/file/upload", formData, {
@@ -190,9 +201,9 @@ const Dashboard = () => {
           // Add uploaded PDFs to documents state
           pdfFiles.forEach((pdf, idx) => {
             uploadedDocs.push({
-              id: documents.length + uploadedDocs.length + 1,
-              name: pdf.name,
-              type: pdf.type,
+              _id: documents.length + uploadedDocs.length + 1,
+              file_name: pdf.name,
+              file_type: pdf.type,
               size: `${(pdf.size / (1024 * 1024)).toFixed(1)} MB`,
               thumbnail: null,
               storedIn: "api",
@@ -229,7 +240,7 @@ const Dashboard = () => {
   // Get file icon based on type
   const getFileIcon = (type) => {
     if (type?.includes("pdf")) return "📄";
-    if (type?.includes("excel") || type?.includes("sheet")) return "📊";
+    if (type?.includes("excel") || type?.includes("sheet") || type?.includes("csv")) return "📊";
     if (type?.includes("word") || type?.includes("doc")) return "📝";
     if (type?.includes("image")) return "🖼️";
     return "📎";
@@ -295,7 +306,7 @@ const Dashboard = () => {
               />
               <Button
                 onClick={connectDatabase}
-                disabled={!dbUrl || isConnecting}
+                disabled={dbUrl.trim().length !== 0 || isConnecting}
                 className="bg-gradient-to-r from-white to-gray-200 hover:from-gray-100 hover:to-gray-300 text-black font-semibold px-8 py-3 sm:py-3.5 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-white/20 whitespace-nowrap"
               >
                 {isConnecting ? "Connecting..." : "Connect"}
@@ -337,25 +348,25 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {documents.map((doc) => (
                 <Card
-                  key={doc.id}
+                  key={doc._id}
                   className="group relative overflow-hidden bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-xl border border-white/10 rounded-2xl hover:border-white/30 transition-all duration-500 hover:scale-[1.02] cursor-pointer shadow-xl hover:shadow-2xl"
-                  onClick={() => navigate(`/document/${doc.id}`)}
+                  onClick={() => navigate(`/document/${doc._id}`)}
                 >
                   {/* Gradient overlay on hover */}
                   <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/0 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
                   <div className="relative aspect-video bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center border-b border-white/10">
                     <span className="text-6xl group-hover:scale-110 transition-transform duration-300">
-                      {getFileIcon(doc.type)}
+                      {getFileIcon(doc.file_type)}
                     </span>
                   </div>
 
                   <div className="relative p-4 bg-gradient-to-b from-transparent to-black/20">
                     <p className="text-white text-sm sm:text-base font-medium truncate mb-1">
-                      {doc.name}
+                      {doc.file_name}
                     </p>
                     <div className="flex items-center justify-between text-xs text-gray-400">
-                      <span>{doc.size}</span>
+                      <span>{1.5}</span>
                       <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         View →
                       </span>

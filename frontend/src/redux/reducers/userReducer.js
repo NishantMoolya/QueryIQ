@@ -34,11 +34,11 @@ const userSlice = createSlice({
             const { auth } = action.payload;
             if (auth) {
               const { data } = action.payload;
-              // console.log(data);
+              console.log(data);
               return {...state,...data,userId: data?._id,auth:auth}
             }else {
-              clearAuthToken();
-              return {...state,auth:auth}
+              // clearAuthToken();
+              // return {...state,auth:auth}
             }
           });
       }

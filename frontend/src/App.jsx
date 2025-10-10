@@ -1,7 +1,7 @@
 import React,{ lazy, Suspense, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom';
-import {  useSelector } from 'react-redux'
-// import { getUserProfile } from './redux/api/userApi'
+import {  useSelector, useDispatch } from 'react-redux'
+import { getUserProfile } from './redux/api/userApi'
 import ProtectedRoute from './components/ProtectedRoute'
 import PrivateRoute from './components/PrivateRoute'
 import Error from './pages/Error'
@@ -18,12 +18,12 @@ const Signup = lazy(() => import('./pages/Signup'));
 
 const App = () => {
 
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const auth = useSelector(state => state.user.auth);
   // const checkRole = useRole();
 
   useEffect(() => {
-    // dispatch(getUserProfile());
+    dispatch(getUserProfile());
   }, [auth]);
 
   return (
