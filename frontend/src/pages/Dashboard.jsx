@@ -324,7 +324,7 @@ const Dashboard = () => {
               />
               <Button
                 onClick={connectDatabase}
-                disabled={dbUrl.trim().length !== 0 || isConnecting}
+                disabled={false}
                 className="bg-gradient-to-r from-white to-gray-200 hover:from-gray-100 hover:to-gray-300 text-black font-semibold px-8 py-3 sm:py-3.5 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-white/20 whitespace-nowrap"
               >
                 {isConnecting ? "Connecting..." : "Connect"}
