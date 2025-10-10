@@ -77,10 +77,10 @@ const Login = () => {
         <CardContent className="flex flex-col gap-4 sm:gap-5">
           <div className="space-y-2">
             <label className="text-gray-300 text-xs sm:text-sm font-medium block">
-              Username
+              Email
             </label>
             <Input
-              type="text"
+              type="email"
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your username"
               className="w-full bg-black/40 border border-gray-700 text-white text-sm sm:text-base focus:ring-2 focus:ring-[#FF6500] focus:border-[#FF6500] placeholder-gray-500 rounded-lg px-3 py-2 sm:px-4 sm:py-2.5 transition-all duration-200"

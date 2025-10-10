@@ -47,13 +47,6 @@ const Chat = () => {
       timestamp: new Date(),
       type: "str",
     },
-    {
-      role: "user",
-      content:
-        "Hello! I can help you query your database or analyze documents. What would you like to know?",
-      timestamp: new Date(),
-      type: "str",
-    },
   ]);
   const [isTyping, setIsTyping] = useState(false);
 
