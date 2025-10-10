@@ -5,6 +5,8 @@ import { clearAuthToken, setAuthToken } from '@/utils/localStorageUtils';
 const initialUser = {
     name:"",
     email:"",
+    db_url: "",
+    canChat: false,
     auth:false,
 }
 
@@ -15,6 +17,10 @@ const userSlice = createSlice({
         login:(state,action) => {
             setAuthToken(action.payload);
             state.auth = true;
+        },
+        updateDB: (state, action) => {
+          state.db_url = action.payload;
+          state.canChat = true; 
         }
     },
     extraReducers:(builder) => {
@@ -28,16 +34,16 @@ const userSlice = createSlice({
             const { auth } = action.payload;
             if (auth) {
               const { data } = action.payload;
-              // console.log(data);
-              return {...state,...data,userId:_id,auth:auth}
+              console.log(data);
+              return {...state,...data,userId: data?._id,auth:auth}
             }else {
-              clearAuthToken();
-              return {...state,auth:auth}
+              // clearAuthToken();
+              // return {...state,auth:auth}
             }
           });
       }
 });
 
-export const { login } = userSlice.actions;
+export const { login, updateDB } = userSlice.actions;
 
 export default userSlice.reducer;
