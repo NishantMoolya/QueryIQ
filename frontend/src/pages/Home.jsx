@@ -1,12 +1,11 @@
-'use client';
-
 import React from 'react';
 import { motion } from 'framer-motion';
-import GradientText from '../components/ui/GradientText/GradientText';
+// import GradientText from '../components/ui/GradientText/GradientText';
 import Prism from '../components/ui/Prism/Prism';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
+import { useSelector } from 'react-redux';
 const Home = () => {
   const navigate = useNavigate();
   // Animation variants for staggered entrance
@@ -32,6 +31,8 @@ const Home = () => {
       }
     }
   };
+
+  const auth = useSelector(state => state.user.auth);
 
   return (
     <div className='relative w-full h-screen bg-black flex items-center justify-center overflow-hidden'>
@@ -76,12 +77,12 @@ const Home = () => {
         {/* Continue Button */}
         <motion.div variants={itemVariants}>
   <Button
-    onClick={() => navigate('/login')}
+    onClick={() => navigate('/dashboard')}
     variant='default'
     size='lg'
     className='mt-8 group relative overflow-hidden bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white px-10 py-4 rounded-2xl   transition-all duration-500 ease-in-out flex items-center gap-3 hover:scale-105 hover:shadow-[0_8px_32px_0_rgba(255,101,0,0.6)]'
   >
-    Continue
+    Get Started
     <ArrowRight className='w-5 h-5 group-hover:translate-x-1 transition-transform duration-300' />
   </Button>
 </motion.div>
