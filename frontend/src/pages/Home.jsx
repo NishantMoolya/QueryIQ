@@ -76,16 +76,16 @@ const Home = () => {
 
         {/* Continue Button */}
         <motion.div variants={itemVariants}>
-  <Button
-    onClick={() => navigate('/dashboard')}
-    variant='default'
-    size='lg'
-    className='mt-8 group relative overflow-hidden bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white px-10 py-4 rounded-2xl   transition-all duration-500 ease-in-out flex items-center gap-3 hover:scale-105 hover:shadow-[0_8px_32px_0_rgba(255,101,0,0.6)]'
-  >
-    Get Started
-    <ArrowRight className='w-5 h-5 group-hover:translate-x-1 transition-transform duration-300' />
-  </Button>
-</motion.div>
+          <Button
+            onClick={() => navigate('/dashboard')}
+            variant='default'
+            size='lg'
+            className='mt-8 group relative overflow-hidden bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white px-10 py-4 rounded-2xl   transition-all duration-500 ease-in-out flex items-center gap-3 hover:scale-105 hover:shadow-[0_8px_32px_0_rgba(255,101,0,0.6)]'
+          >
+            Get Started
+            <ArrowRight className='w-5 h-5 group-hover:translate-x-1 transition-transform duration-300' />
+          </Button>
+        </motion.div>
 
       </motion.div>
     </div>

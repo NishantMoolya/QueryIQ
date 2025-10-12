@@ -11,7 +11,6 @@ import {
   FileText,
   X,
   Upload,
-  Sparkles,
 } from "lucide-react";
 import {
   Dialog,
@@ -24,6 +23,7 @@ import { supabase } from "@/lib/supabaseClient";
 import axiosInstance from "@/api/axios";
 import { useDispatch, useSelector } from "react-redux";
 import { updateDB } from "@/redux/reducers/userReducer";
+import ConnectDatabases from "@/components/ui/dashboard/ConnectDatabases"
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -48,7 +48,6 @@ const Dashboard = () => {
       console.log("res", res);
       const main_data = res.data.data.filter(file => {
         if (file.file_type === "db") {
-          // dispatch(updateDB(file.file_url));
           setDbUrl(file.file_url);
         } else return file;
       })
@@ -59,7 +58,7 @@ const Dashboard = () => {
   }
   // Fetch previously uploaded documents on component mount
   useEffect(() => {
-    fetchFiles();
+    // fetchFiles();
   }, []);
 
   // Handle database connection
@@ -287,7 +286,6 @@ const Dashboard = () => {
                   ]}
                   animationSpeed={10}
                   showBorder={false}
-                // className="font-extrabold"
                 >
 
                   Dashboard
@@ -297,45 +295,13 @@ const Dashboard = () => {
                 Manage your databases and documents
               </p>
             </div>
-            <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-white/20" />
           </div>
         </div>
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Connect to Database Section */}
-        <div className="mb-12 sm:mb-16">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-white/10 to-white/5 border border-white/10">
-              <Database className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-semibold">
-              Connect Database
-            </h2>
-          </div>
-
-          <Card className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl hover:border-white/20 transition-all duration-300">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Input
-                value={dbUrl}
-                onChange={(e) => setDbUrl(e.target.value)}
-                placeholder="mongodb://username:password@host:port/database"
-                className="flex-1 bg-black/40 border border-white/20 text-white text-sm sm:text-base focus:ring-2 focus:ring-white/30 focus:border-white/30 placeholder-gray-500 rounded-xl px-4 py-3 sm:py-3.5"
-              />
-              <Button
-                onClick={connectDatabase}
-                disabled={false}
-                className="bg-gradient-to-r from-white to-gray-200 hover:from-gray-100 hover:to-gray-300 text-black font-semibold px-8 py-3 sm:py-3.5 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-white/20 whitespace-nowrap"
-              >
-                {isConnecting ? "Connecting..." : "Connect"}
-              </Button>
-            </div>
-            <p className="text-gray-500 text-xs sm:text-sm mt-4 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
-              Supports MongoDB, PostgreSQL, MySQL, and more
-            </p>
-          </Card>
-        </div>
+        <ConnectDatabases />
 
         {/* Documents Section */}
         <div>
@@ -534,7 +500,7 @@ const Dashboard = () => {
       </Button>
 
       {/* Custom scrollbar styles */}
-      <style jsx>{`
+      {/* <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 8px;
         }
@@ -549,7 +515,7 @@ const Dashboard = () => {
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: rgba(255, 255, 255, 0.3);
         }
-      `}</style>
+      `}</style> */}
     </div>
   );
 };
