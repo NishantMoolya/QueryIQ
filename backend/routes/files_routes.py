@@ -16,6 +16,6 @@ async def handle_request(request: Request, files: List[FilePayload]):
     return await add_files(user_id, files)
 
 @files_router.get("/")
-async def handle_request(request: Request):
+async def handle_request(request: Request, file_type: str | None = None):
     user_id = request.state.user_id
-    return await get_files(user_id)
+    return await get_files(user_id, file_type)

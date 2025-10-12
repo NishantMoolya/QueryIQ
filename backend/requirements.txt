@@ -11,5 +11,5 @@ python-multipart
 langchain[google-genai]
 sqlalchemy
 pymysql
-langchain_mongodb
+langchain-mongodb
 psycopg2

@@ -122,10 +122,14 @@ async def add_files(user_id: str, files: List[FilePayload]):
             content={"message": f"An unexpected error occurred: {str(e)}"}
         )
         
-async def get_files(user_id: str):
+async def get_files(user_id: str, file_type: str | None = None):
     try:
         # Fetch all files for this user
-        res = list(user_files.find({"user_id": user_id}))
+        query = {"user_id": user_id}
+        if file_type:
+            query["file_type"] = file_type
+            
+        res = list(user_files.find(query))
 
         # Convert ObjectId to string for JSON serialization
         for file in res:
