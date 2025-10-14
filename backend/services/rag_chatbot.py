@@ -3,8 +3,9 @@ from services.prompts import rag_chat_prompt_template
 from services.output_parsers import str_output_parser
 from services.retriever import create_retriever
 from utils.chatbot_utils import docs_to_str
+from typing import Union
 
-async def rag_chat(user_id: str, user_query: str, doc_ids: list[str] | None = None, file_type: str = "application/pdf"):
+async def rag_chat(user_id: str, user_query: str, doc_ids: Union[list[str], None] = None):
     try: 
         if chat_llm is None:
             raise Exception("No chatbot found")
@@ -18,12 +19,12 @@ async def rag_chat(user_id: str, user_query: str, doc_ids: list[str] | None = No
         print("retriever active.")
         print("retrieving context...")
         
-        metadata_filter = {"user_id": user_id, "file_type": file_type}
+        metadata_filter = {"user_id": user_id}
         if doc_ids:
             metadata_filter["uid"] = {"$in": doc_ids}
         docs = await retriever.ainvoke(user_query, metadata=metadata_filter)
         context = docs_to_str(docs)
-        print("bchjb", context)
+        print("context: ", context)
         
         print("chatbot responding...")
         chain = rag_chat_prompt_template | chat_llm | str_output_parser
