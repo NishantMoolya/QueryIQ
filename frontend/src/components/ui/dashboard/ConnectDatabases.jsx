@@ -104,7 +104,7 @@ const ConnectDatabases = () => {
                         className="bg-gradient-to-r from-white to-gray-200 self-end hover:from-gray-100 hover:to-gray-300 text-black font-semibold px-8 py-3 sm:py-3.5 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-white/20 whitespace-nowrap"
                     >
                         {isLoading ? (
-                            <span className="flex items-center gap-2">
+                            <span className="flex justify-center gap-2">
                                 <Loader2 className="w-4 h-4 animate-spin" /> Adding...
                             </span>
                         ) : (

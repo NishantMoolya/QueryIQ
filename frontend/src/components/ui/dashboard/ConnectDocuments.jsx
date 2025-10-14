@@ -9,6 +9,7 @@ import DocumentCard from './DocumentCard';
 const ConnectDocuments = () => {
     const [documents, setDocuments] = useState([]);
     const [isFetching, setIsFetching] = useState(false);
+    const [openUpload, setOpenUpload] = useState(false);
 
     // Fetch all connected File URLs
     const fetchFileUrls = async () => {
@@ -63,7 +64,7 @@ const ConnectDocuments = () => {
                     ) :
                         documents.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                                {documents.map((doc) => <DocumentCard doc={doc} />)}
+                                {documents.map((doc) => <DocumentCard key={doc._id} doc={doc} />)}
                             </div>
                         ) : <p className="text-gray-400 text-sm sm:text-base">
                             No documents added yet.
@@ -71,7 +72,7 @@ const ConnectDocuments = () => {
                 </Card>
             </div>
             {/* Upload Modal */}
-            <UploadFormModal />
+            <UploadFormModal openUpload={openUpload} setOpenUpload={setOpenUpload} documents={documents} setDocuments={setDocuments} />
         </>
     )
 }
