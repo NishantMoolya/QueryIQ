@@ -17,6 +17,7 @@ async def router_based_chat(user_id: str, user_query: str):
         csv_schema = ""
         csv_urls = {}
         db_url = ""
+        doc_ids = []
         
         # Iterate and classify schemas
         for file in user_files:
@@ -26,9 +27,14 @@ async def router_based_chat(user_id: str, user_query: str):
             elif file.get("file_type") == "csv":
                 csv_schema += f"\n{file.get('schema', '')}"
                 csv_urls[file.get("file_name", 'default')] = file.get("file_url", '')
+            elif file.get("file_type") == "application/pdf":
+                doc_id = file.get("uid", None)
+                if doc_id:
+                    doc_ids.append(doc_id)
         
         print(f"DB Schema:\n{db_schema}")
         print(f"CSV Schema:\n{csv_schema}")
+        print(f"doc Ids:\n{doc_ids}")
         
         src = await router_chat(user_query, db_schema, csv_schema)
         print(f"res: {src}")
@@ -45,7 +51,7 @@ async def router_based_chat(user_id: str, user_query: str):
             res = res["result"]
             res_type = 'json'
         elif src == 'rag':
-            res = await rag_chat(user_id, user_query)
+            res = await rag_chat(user_id, user_query, doc_ids)
         else:
             res = await general_chat(user_query)
         

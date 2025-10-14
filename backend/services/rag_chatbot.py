@@ -4,7 +4,7 @@ from services.output_parsers import str_output_parser
 from services.retriever import create_retriever
 from utils.chatbot_utils import docs_to_str
 
-async def rag_chat(user_id: str, user_query: str, file_type: str = "application/pdf"):
+async def rag_chat(user_id: str, user_query: str, doc_ids: list[str] | None = None, file_type: str = "application/pdf"):
     try: 
         if chat_llm is None:
             raise Exception("No chatbot found")
@@ -19,6 +19,8 @@ async def rag_chat(user_id: str, user_query: str, file_type: str = "application/
         print("retrieving context...")
         
         metadata_filter = {"user_id": user_id, "file_type": file_type}
+        if doc_ids:
+            metadata_filter["uid"] = {"$in": doc_ids}
         docs = await retriever.ainvoke(user_query, metadata=metadata_filter)
         context = docs_to_str(docs)
         print("bchjb", context)

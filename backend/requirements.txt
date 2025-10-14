@@ -14,3 +14,4 @@ pymysql
 langchain-mongodb
 psycopg2
 aiohttp
+uuid

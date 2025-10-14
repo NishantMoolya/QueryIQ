@@ -3,6 +3,8 @@ from fastapi.responses import JSONResponse
 from typing import List, Union
 from db.connect import db
 import datetime
+import uuid
+from bson import ObjectId
 from services.text_extractor import text_extractor
 from services.vector_store import store_in_vectorstore
 from langchain_core.documents import Document
@@ -11,6 +13,7 @@ from services.fetch_tables_and_schemas_sqlalchemy import fetch_tables_and_schema
 from services.csv_schema_loader import get_csv_schema
 
 user_files = db["user_files"]
+knowledge_base_chunks = db["knowledge_base_chunks"]    
 
 async def upload_files(user_id: str, files: List[UploadFile]):
     try:
@@ -22,12 +25,14 @@ async def upload_files(user_id: str, files: List[UploadFile]):
 
             # Extract chunks using your text_extractor
             docs = await text_extractor(contents)
-
+            
+            uid = str(uuid.uuid4())
             # Prepare chunks for vectorstore
             final_docs = [
                 Document(
                     page_content=doc.page_content,
                     metadata={
+                        "uid": uid,     
                         "user_id": user_id,
                         "file_name": file.filename,
                         "file_type": file.content_type,
@@ -45,7 +50,8 @@ async def upload_files(user_id: str, files: List[UploadFile]):
                 "file_type": file.content_type,
                 "file_url": None,
                 "uploaded_at": str(datetime.datetime.now()),
-                "schema": ""
+                "schema": "",
+                "uid": uid    
             }
 
             # Insert and capture the inserted ID
@@ -121,12 +127,12 @@ async def add_files(user_id: str, files: List[FilePayload]):
             content={"message": f"An unexpected error occurred: {str(e)}"}
         )
         
-async def get_files(user_id: str, file_type: Union[List[str], None] = None):
+async def get_files(user_id: str, file_types: Union[List[str], None] = None):
     try:
         # Fetch all files for this user
         query = {"user_id": user_id}
-        if file_type:
-            query["file_type"] = {"$in": file_type}
+        if file_types:
+            query["file_type"] = {"$in": file_types}
             
         res = list(user_files.find(query))
 
@@ -139,6 +145,71 @@ async def get_files(user_id: str, file_type: Union[List[str], None] = None):
             content={
                 "message": "Files fetched successfully",
                 "data": res
+            }
+        )
+
+    except Exception as e:
+        print(f"An unexpected error occurred: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"message": f"An unexpected error occurred: {str(e)}"}
+        )
+        
+async def remove_files(user_id: str, file_ids: Union[List[str], None] = None):
+    try:
+        if not file_ids:
+            return JSONResponse(
+            status_code=200,
+            content={
+                "message": "No files selected",
+                "data": None
+            }
+        )
+            
+        uids_to_delete = []
+        deleted_files = []
+
+        for file_id in file_ids:
+            # Find the file record
+            existing_file = user_files.find_one({
+                "_id": ObjectId(file_id),
+                "user_id": user_id
+            })
+
+            if not existing_file:
+                print(f"File not found for ID: {file_id}")
+                continue
+
+            uid = existing_file.get("uid", None)
+
+            # Delete from user_files
+            user_files.delete_one({"_id": ObjectId(file_id)})
+
+            # If it's a PDF, mark its chunks for deletion
+            if uid:
+                uids_to_delete.append(uid)
+
+            deleted_files.append({
+                "file_id": file_id,
+                "file_name": existing_file.get("file_name"),
+                "file_type": existing_file.get("file_type")
+            })
+
+        # Delete PDF chunks only
+        chunks_deleted = 0
+        if uids_to_delete:
+            result = knowledge_base_chunks.delete_many({"uid": {"$in": uids_to_delete}})
+            chunks_deleted = result.deleted_count
+
+        return JSONResponse(
+            status_code=200,
+            content={
+                "message": "Files deleted successfully",
+                "data": {
+                    "total_files_deleted": len(deleted_files),
+                    "pdf_chunks_deleted": chunks_deleted,
+                    "deleted_files": deleted_files
+                }
             }
         )
 
