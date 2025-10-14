@@ -1,6 +1,6 @@
 from fastapi import UploadFile
 from fastapi.responses import JSONResponse
-from typing import List
+from typing import List, Union
 from db.connect import db
 import datetime
 from services.text_extractor import text_extractor
@@ -122,12 +122,12 @@ async def add_files(user_id: str, files: List[FilePayload]):
             content={"message": f"An unexpected error occurred: {str(e)}"}
         )
         
-async def get_files(user_id: str, file_type: str | None = None):
+async def get_files(user_id: str, file_type: Union[List[str], None] = None):
     try:
         # Fetch all files for this user
         query = {"user_id": user_id}
         if file_type:
-            query["file_type"] = file_type
+            query["file_type"] = {"$in": file_type}
             
         res = list(user_files.find(query))
 

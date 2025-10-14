@@ -18,7 +18,7 @@ const ConnectDatabases = () => {
         try {
             setIsFetching(true);
             const res = await axiosInstance.get("/file?file_type=db");
-            console.log("DB urls: ", res);
+            // console.log("DB urls: ", res);
             setDBUrlList(res.data.data || []);
         } catch (err) {
             console.error(err);
@@ -41,7 +41,7 @@ const ConnectDatabases = () => {
           file_type: "db"
         }]
             const res = await axiosInstance.post("/file/add", payload);
-            console.log("add db: ", res);
+            // console.log("add db: ", res);
             if(res.status === 201) {
                 setDBUrlList((prev) => [...prev, res.data.data[0]]);
                 setDbName("");
@@ -66,9 +66,14 @@ const ConnectDatabases = () => {
                 <div className="p-2 rounded-lg bg-gradient-to-br from-white/10 to-white/5 border border-white/10">
                     <Database className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
+                <div>
                 <h2 className="text-2xl sm:text-3xl font-semibold text-white">
                     Databases
                 </h2>
+                <p className="text-gray-500 text-sm mt-0.5">
+                    {DBUrlList.length} databases
+                </p>
+                </div>
             </div>
 
             {/* Input Card */}
@@ -116,10 +121,10 @@ const ConnectDatabases = () => {
                         </div>
                     ) : DBUrlList.length === 0 ? (
                         <p className="text-gray-400 text-sm sm:text-base">
-                            No databases connected yet.
+                            No databases added yet.
                         </p>
                     ) : (
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-2">
                             {DBUrlList.map((db) => (
                                 <Card
                                     key={db._id}
