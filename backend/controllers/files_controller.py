@@ -76,7 +76,6 @@ async def upload_files(user_id: str, files: List[UploadFile]):
             content={"message": f"An unexpected error occurred: {str(e)}"}
         )
         
-
 async def add_files(user_id: str, files: List[FilePayload]):
     try:
         files_info = []
@@ -88,7 +87,7 @@ async def add_files(user_id: str, files: List[FilePayload]):
             elif file.file_type == 'csv':
                 schema_dict = {}
                 schema_dict[file.file_name] = file.file_url
-                schema = get_csv_schema(schema_dict)
+                schema = await get_csv_schema(schema_dict)
             
             file_data = {
                 "user_id": user_id,

@@ -22,10 +22,3 @@ def fetch_tables_and_schemas_sqlalchemy(db_url: str) -> dict:
         schemas[table_name] = f"{table_name}({', '.join(column_defs)})"
     
     return schemas
-
-# checking the function is working by calling it with an example url.
-# db_url = "mysql+pymysql://root:ADITIUSESMYSQL@127.0.0.1:3306/dbnew"
-# schemas = fetch_tables_and_schemas_sqlalchemy(db_url)
-# print("Fetched Schemas:")
-# for table, schema in schemas.items():
-#     print(f"{table}{schema}")

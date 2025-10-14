@@ -13,3 +13,4 @@ sqlalchemy
 pymysql
 langchain-mongodb
 psycopg2
+aiohttp
