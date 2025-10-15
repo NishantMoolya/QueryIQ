@@ -7,4 +7,4 @@ chat_router = APIRouter()
 @chat_router.post("/answer")
 async def handle_request(request: Request, body: UserQuery):
     user_id = request.state.user_id
-    return await router_based_chat(user_id, body.query)
+    return await router_based_chat(user_id, body)

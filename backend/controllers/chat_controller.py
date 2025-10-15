@@ -5,13 +5,19 @@ from services.db_chatbot import db_chat
 from services.csv_chatbot import csv_chat
 from services.general_chatbot import general_chat
 from db.connect import db
+from models.chat_models import UserQuery
+from bson import ObjectId
 
 user_files = db["user_files"]
 
-async def router_based_chat(user_id: str, user_query: str):
+async def router_based_chat(user_id: str, user_query: UserQuery):
     try:
          # Fetch all files uploaded by the user
-        user_files = list(db["user_files"].find({"user_id": user_id}))
+        query = {"user_id": user_id}
+        if user_query.sources:
+            query["_id"] = { "$in": [ObjectId(i) for i in user_query.sources] }
+            
+        user_files = list(db["user_files"].find(query))
         
         db_schema = ""
         csv_schema = ""
@@ -36,7 +42,7 @@ async def router_based_chat(user_id: str, user_query: str):
         print(f"CSV Schema:\n{csv_schema}")
         print(f"doc Ids:\n{doc_ids}")
         
-        src = await router_chat(user_query, db_schema, csv_schema)
+        src = await router_chat(user_query.query, db_schema, csv_schema)
         print(f"res: {src}")
         res = ""
         res_type = "str"
@@ -44,16 +50,20 @@ async def router_based_chat(user_id: str, user_query: str):
         if src == 'db':
             if len(db_url.strip()) == 0:
                 raise Exception("db URL not found")
-            res =  await db_chat(db_url, db_schema, user_query)
+            res =  await db_chat(db_url, db_schema, user_query.query)
             res_type = 'json'
         elif src == 'csv':
-            res = await csv_chat(user_query, csv_urls, csv_schema)
+            res = await csv_chat(user_query.query, csv_urls, csv_schema)
             res = res["result"]
             res_type = 'json'
         elif src == 'rag':
-            res = await rag_chat(user_id, user_query, doc_ids)
+            res = await rag_chat(user_id, user_query.query, doc_ids)
+            if len(res.strip()) == 0:
+                raise Exception("no response returned")
         else:
-            res = await general_chat(user_query)
+            res = await general_chat(user_query.query)
+            if len(res.strip()) == 0:
+                raise Exception("no response returned")
         
         return JSONResponse(status_code=200,content={"message": "chat successful", "data": {"res": res, "type": res_type}})
     except Exception as e:
