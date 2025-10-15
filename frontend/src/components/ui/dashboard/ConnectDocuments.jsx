@@ -49,7 +49,7 @@ const ConnectDocuments = () => {
                     </div>
                     <Button
                         onClick={() => setOpenUpload(true)}
-                        className="flex items-center gap-2 bg-white hover:bg-gray-100 text-black font-semibold px-5 py-2.5 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-white/20"
+                        className="flex items-center self-end gap-2 bg-white hover:bg-gray-100 text-black font-semibold px-5 py-2.5 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-white/20"
                     >
                         <Plus className="w-4 h-4 sm:w-5 sm:h-5" /> Add Document
                     </Button>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Database, Loader2 } from "lucide-react";
+import { Database, Loader2, Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -108,7 +108,9 @@ const ConnectDatabases = () => {
                                 <Loader2 className="w-4 h-4 animate-spin" /> Adding...
                             </span>
                         ) : (
-                            "Add"
+                            <>
+                            <Plus className="w-4 h-4 sm:w-5 sm:h-5" /> Add
+                            </>
                         )}
                     </Button>
                 </div>
