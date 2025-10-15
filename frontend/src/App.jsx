@@ -33,11 +33,7 @@ const App = () => {
         <Route path='/' element={<Home />} />
         <Route path='/login' element={<Suspense fallback={<div className='flex h-96 justify-center items-center'><Spinner /></div>}><Login /></Suspense>} />
         <Route path='/signup' element={<Suspense fallback={<div className='flex h-96 justify-center items-center'><Spinner /></div>}><Signup /></Suspense>} />
-        <Route path='/dashboard' element={
-          // <PrivateRoute>
-          <Dashboard />
-          // </PrivateRoute>
-        }/>
+        <Route path='/dashboard' element={<PrivateRoute><Dashboard /></PrivateRoute>}/>
         <Route path= '/chat' element={<PrivateRoute><Chat/></PrivateRoute>}/>
         <Route path='*' element={<Error />} />
       </Routes>
