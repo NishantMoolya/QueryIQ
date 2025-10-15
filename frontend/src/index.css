@@ -143,3 +143,29 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ==== Modern Scrollbar ==== */
+::-webkit-scrollbar {
+  width: 8px;               /* Scrollbar width */
+  height: 8px;              /* For horizontal scroll */
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;  /* Track background */
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #888 0%, #555 100%);
+  border-radius: 9999px;    /* Fully rounded edges */
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #aaa 0%, #666 100%);
+}
+
+/* ==== Firefox Support ==== */
+* {
+  scrollbar-width: thin;            /* "auto" or "thin" */
+  scrollbar-color: #666 transparent; /* thumb color | track color */
+}

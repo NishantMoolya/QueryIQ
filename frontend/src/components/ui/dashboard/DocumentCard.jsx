@@ -1,16 +1,8 @@
 import React from 'react'
 import { Card } from '../card';
+import { getFileIcon } from "@/utils/fileUtils"
 
 const DocumentCard = ({ doc }) => {
-    // Get file icon based on type
-    const getFileIcon = (type) => {
-        if (type?.includes("pdf")) return "📄";
-        if (type?.includes("excel") || type?.includes("sheet") || type?.includes("csv")) return "📊";
-        if (type?.includes("word") || type?.includes("doc")) return "📝";
-        if (type?.includes("image")) return "🖼️";
-        return "📎";
-    };
-
     return (
         <Card
             key={doc._id}
