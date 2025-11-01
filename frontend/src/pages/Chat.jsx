@@ -14,7 +14,6 @@ import {
   User,
 } from "lucide-react";
 import axiosInstance from "@/api/axios";
-import { getFileIcon } from "@/utils/fileUtils"
 import ChatInput from "@/components/ui/chat/ChatInput";
 import TypingIndicator from "@/components/ui/chat/TypingIndicator";
 import ChatSidebar from "@/components/ui/chat/ChatSidebar";
@@ -35,8 +34,11 @@ const Chat = () => {
   const handleDocSelect = (id, status) => {
     console.log(id, status);
     
-    if(selectedDocuments.includes(id)) return;
-    setSelectedDocuments(p => [...p,id]);
+    if(status === false) setSelectedDocuments(p => [...p,id]);
+    else {
+      const newData = selectedDocuments.filter((item) => item === id);
+      setSelectedDocuments(newData);
+    }
   }
 
   // Chat state

@@ -4,12 +4,12 @@ import { Database, FileText } from 'lucide-react'
 import { Checkbox } from "@/components/ui/checkbox"
 
 const SourceCard = ({ src_type = 'db', data, handleSelect, isSelected = false }) => {
-    const [checked, setChecked] = useState(isSelected);
+    // const [checked, setChecked] = useState(isSelected);
     const toggleChecked = () => {
-        setChecked((prev) => {
-            handleSelect(data?._id, prev);
-            return !prev;
-        });
+        // setChecked((prev) => {
+        //     return !prev;
+        // });
+        handleSelect(data?._id, isSelected);
     }
 
     return (
@@ -23,7 +23,7 @@ const SourceCard = ({ src_type = 'db', data, handleSelect, isSelected = false })
                         <p className="text-sm font-semibold text-white">{data?.file_name || 'Source'}</p>
                     </div>
                 </div>
-                <Checkbox checked={checked} onCheckedChange={toggleChecked} />
+                <Checkbox checked={isSelected} onCheckedChange={toggleChecked} />
             </div>
         </Card>
     )
