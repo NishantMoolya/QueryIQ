@@ -1,8 +1,8 @@
 from langchain_core.vectorstores import VectorStoreRetriever
 from services.vector_store import create_vectorstore
-from typing import Optional
+from typing import Union
 
-async def create_retriever() -> Optional[VectorStoreRetriever]:
+async def create_retriever() -> Union[VectorStoreRetriever, None]:
     try:
         default_search_kwargs = {
             'k': 3,

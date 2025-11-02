@@ -1,6 +1,7 @@
 import pandas as pd
 from services.llms import chat_llm
 from services.csv_schema_loader import load_all_files_from_supabase
+from typing import Union
 
 # === Prompt Builder ===
 def create_multi_csv_prompt(user_query: str, schema_info: str) -> str:
@@ -65,7 +66,7 @@ def is_secure(code: str) -> bool:
     return True
 
 # === Safe Code Execution ===
-def safe_execute(code: str, dataframes: dict[str, pd.DataFrame]) -> pd.DataFrame | None:
+def safe_execute(code: str, dataframes: dict[str, pd.DataFrame]) -> Union[pd.DataFrame, None]:
     if not code:
         print("No code to execute.")
         return None

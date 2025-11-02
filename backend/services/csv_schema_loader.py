@@ -1,9 +1,10 @@
 import pandas as pd
 import aiohttp
 from io import StringIO, BytesIO
+from typing import Union
 
 # === CSV/Excel Loader from URLs ===
-async def load_file_from_url(url: str, name: str) -> pd.DataFrame | None:
+async def load_file_from_url(url: str, name: str) -> Union[pd.DataFrame, None]:
     """Load CSV or Excel from a Supabase public/signed URL (async with aiohttp)."""
     try:
         async with aiohttp.ClientSession() as session:
