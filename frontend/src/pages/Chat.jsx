@@ -1,22 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Send,
-  Database,
-  FileText,
-  X,
-  Menu,
-  ArrowLeft,
-  Bot,
-  User,
-} from "lucide-react";
+import { Menu, Bot, User } from "lucide-react";
 import axiosInstance from "@/api/axios";
 import ChatInput from "@/components/ui/chat/ChatInput";
 import TypingIndicator from "@/components/ui/chat/TypingIndicator";
 import ChatSidebar from "@/components/ui/chat/ChatSidebar";
+import ChatTextResponse from "@/components/ui/chat/ChatTextResponse";
+import ChatTableResponse from "@/components/ui/chat/ChatTableResponse";
 
 const Chat = () => {
   const navigate = useNavigate();
@@ -26,35 +17,41 @@ const Chat = () => {
   const [selectedDB, setSelectedDB] = useState("");
   const [selectedDocuments, setSelectedDocuments] = useState([]);
 
-  const handleDBSelect = (id, status) => {
-    console.log(id, status);
-    setSelectedDB(id);
-  }
-
-  const handleDocSelect = (id, status) => {
-    console.log(id, status);
-    
-    if(status === false) setSelectedDocuments(p => [...p,id]);
-    else {
-      const newData = selectedDocuments.filter((item) => item === id);
-      setSelectedDocuments(newData);
-    }
-  }
-
-  // Chat state
   const [chatInput, setChatInput] = useState("");
   const [messages, setMessages] = useState([
     {
       role: "assistant",
       content:
-        "Hello! I can help you query your database or analyze documents. What would you like to know?",
+      "Hello! I can help you query your database or analyze documents. What would you like to know?",
       timestamp: new Date(),
       type: "str",
     },
   ]);
   const [isTyping, setIsTyping] = useState(false);
 
+  const handleDBSelect = (id, status) => {
+    // console.log(id, status);
+    if(status) setSelectedDB("");
+    else setSelectedDB(id);
+  }
 
+  const handleDocSelect = (id, status) => {
+    // console.log(id, status);
+    
+    if(status) {
+      const newData = selectedDocuments.filter((item) => {
+        if(item === id) return false;
+        else return true;
+      });
+      // console.log("newdata:", newData);
+      
+      setSelectedDocuments(newData);
+    } 
+    else {
+      setSelectedDocuments(p => [...p,id]);
+    }
+  }
+  
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -64,14 +61,14 @@ const Chat = () => {
   const sendChat = async () => {
     if (chatInput.trim().length === 0) return;
 
-    if (!isDbConnected && documents.length === 0) {
-      alert("Please connect a database or upload documents first");
+    if (selectedDB.length === 0 && selectedDocuments.length === 0) {
+      alert("Please select a database or documents.");
       return;
     }
 
     const newMessage = {
       role: "user",
-      content: chatInput,
+      content: chatInput.trim(),
       timestamp: new Date(),
       type: "str",
     };
@@ -80,9 +77,13 @@ const Chat = () => {
     setIsTyping(true);
 
     try {
-      const res = await axiosInstance.post("/chat/answer", {
-        query: chatInput,
-      });
+      let payload = {
+        query: chatInput.trim(),
+        sources: [...selectedDocuments]
+      }
+      if(selectedDB.length > 0) payload.sources.push(selectedDB);
+
+      const res = await axiosInstance.post("/chat/answer", payload);
 
       const responseData = res?.data?.data;
       const responseType = responseData?.type || "str";
@@ -242,13 +243,6 @@ const Chat = () => {
     }
   };
 
-  const formatTime = (date) => {
-    return new Date(date).toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
   return (
     <div className="flex h-screen w-full bg-gradient-to-br from-black via-gray-950 to-black text-white overflow-hidden">
       {/* Sidebar */}
@@ -287,87 +281,22 @@ const Chat = () => {
         <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 custom-scrollbar">
           <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
             {messages.map((msg, idx) => (
-              <div
-                key={idx}
-                className={`flex gap-2 sm:gap-3 md:gap-4 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"
-                  } ${msg.role === "assistant" ? "" : ""}`}
-              >
-                {/* {msg.role !== "assistant" && ( */}
+              <div key={idx} className={`flex gap-2 sm:gap-3 md:gap-4 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
                 <div
-                  className={`flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center ${msg.role === "user"
-                      ? "bg-gradient-to-br from-white to-gray-300"
-                      : "bg-gradient-to-br from-white/20 to-white/10 border border-white/20"
-                    }`}
-                >
+                  className={`flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-white/20 to-white/10 border border-white/20`}>
                   {msg.role === "user" ? (
-                    <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-black" />
+                    <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white" />
                   ) : (
                     <Bot className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white" />
                   )}
                 </div>
-                {/* )} */}
 
-                <div
-                  className={`${msg.role === "assistant"
-                      ? "flex"
-                      : msg.role === "user"
-                        ? "flex justify-end"
-                        : "flex justify-start"
-                    } ${msg.role === "assistant" ? "flex-1 min-w-0" : "flex-1 min-w-0"}`}
-                >
-                  {msg.role === "assistant" ? (
-                    <div className="max-w-[800px]">
-                      {msg.type === "json" ? (
-                        // render HTML (table)
-                        <div
-                          // className="inline-block bg-white/5 border border-white/10 px-3 sm:px-4 py-2 sm:py-3 rounded-xl text-[10px] sm:text-sm text-gray-300 overflow-x-auto"
-                          className="overflow-x-auto text-xs sm:text-sm text-gray-200"
-                          dangerouslySetInnerHTML={{ __html: msg.content }}
-                        />
-                      ) : (
-                        // render normal text response
-                        <div
-                          className={`inline-block max-w-[85%] sm:max-w-[80%] md:max-w-[75%] lg:max-w-[70%] rounded-2xl px-4 sm:px-4 md:px-5 py-4 sm:py-4 md:py-4 ${msg.role === "user"
-                              ? "bg-gradient-to-r from-white to-gray-100 text-black"
-                              : "bg-gradient-to-br from-white/10 to-white/5 border border-white/10 text-white backdrop-blur-xl"
-                            }`}
-                          style={{
-                            wordWrap: "break-word",
-                            overflowWrap: "break-word",
-                            hyphens: "auto",
-                          }}
-                        >
-                          <p className="text-xs sm:text-sm md:text-base leading-relaxed whitespace-pre-wrap break-words">
-                            {msg.content}
-                          </p>
-                        </div>
-                      )}
+                <div className={`flex ${msg.role === "user" ? "flex justify-end" : "flex justify-start"} flex-1 min-w-0`}>
+                  {msg.role === "assistant" 
+                    ? <div className="max-w-[800px]">
+                      {msg.type === "json" ? <ChatTableResponse data={msg.content} /> : <ChatTextResponse text={msg.content} />}
                     </div>
-                  ) : (
-                    <div
-                      className={`inline-block max-w-[85%] sm:max-w-[80%] md:max-w-[75%] lg:max-w-[70%] rounded-2xl px-4 sm:px-4 md:px-5 py-4 sm:py-4 md:py-4 ${msg.role === "user"
-                          ? "bg-gradient-to-r from-white to-gray-100 text-black"
-                          : "bg-gradient-to-br from-white/10 to-white/5 border border-white/10 text-white backdrop-blur-xl"
-                        }`}
-                      style={{
-                        wordWrap: "break-word",
-                        overflowWrap: "break-word",
-                        hyphens: "auto",
-                      }}
-                    >
-                      <p className="text-xs sm:text-sm md:text-base leading-relaxed whitespace-pre-wrap break-words">
-                        {msg.content}
-                      </p>
-                      <p
-                        className={`text-[10px] sm:text-xs mt-1.5 sm:mt-2 text-right ${msg.role === "user"
-                            ? "text-gray-600"
-                            : "text-gray-400"
-                          } text-right`}
-                      >
-                        {formatTime(msg.timestamp)}
-                      </p>
-                    </div>
-                  )}
+                    : <ChatTextResponse text={msg.content} />}
                 </div>
               </div>
             ))}
@@ -380,7 +309,7 @@ const Chat = () => {
         </div>
 
         {/* Chat Input */}
-        <ChatInput input={chatInput} setInput={setChatInput} handleSend={sendChat} handleKeyPress={handleKeyPress} isDisabled={(chatInput.trim() == 0) || (!isDbConnected || selectedDocument)} />
+        <ChatInput input={chatInput} setInput={setChatInput} handleSend={sendChat} handleKeyPress={handleKeyPress} isDisabled={!((chatInput.trim().length > 0) && (selectedDB.length > 0 || selectedDocuments.length > 0))} />
       </div>
     </div>
   );

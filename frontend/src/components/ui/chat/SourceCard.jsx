@@ -4,11 +4,7 @@ import { Database, FileText } from 'lucide-react'
 import { Checkbox } from "@/components/ui/checkbox"
 
 const SourceCard = ({ src_type = 'db', data, handleSelect, isSelected = false }) => {
-    // const [checked, setChecked] = useState(isSelected);
     const toggleChecked = () => {
-        // setChecked((prev) => {
-        //     return !prev;
-        // });
         handleSelect(data?._id, isSelected);
     }
 
