@@ -17,3 +17,4 @@ aiohttp
 uuid
 sentence-transformers
 pandas
+pypdf
