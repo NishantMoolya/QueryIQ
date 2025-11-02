@@ -12,7 +12,7 @@ import ChatTableResponse from "@/components/ui/chat/ChatTableResponse";
 const Chat = () => {
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const [selectedDB, setSelectedDB] = useState("");
   const [selectedDocuments, setSelectedDocuments] = useState([]);
@@ -56,6 +56,11 @@ const Chat = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    let timer = setTimeout(() => setIsSidebarOpen(true), 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Send chat message
   const sendChat = async () => {

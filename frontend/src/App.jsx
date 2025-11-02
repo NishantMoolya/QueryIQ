@@ -13,17 +13,16 @@ import Spinner from './components/loaders/Spinner';
 // import Navbar from './components/Navbar';
 import Chat from './pages/Chat'
 const Login = lazy(() => import('./pages/Login'));
-const Signup = lazy(() => import('./pages/Signup'));
+// const Signup = lazy(() => import('./pages/Signup'));
 
 
 const App = () => {
 
   const dispatch = useDispatch();
   const auth = useSelector(state => state.user.auth);
-  // const checkRole = useRole();
 
   useEffect(() => {
-    // dispatch(getUserProfile());
+    dispatch(getUserProfile());
   }, [auth]);
 
   return (
@@ -32,7 +31,7 @@ const App = () => {
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/login' element={<Suspense fallback={<div className='flex h-96 justify-center items-center'><Spinner /></div>}><Login /></Suspense>} />
-        <Route path='/signup' element={<Suspense fallback={<div className='flex h-96 justify-center items-center'><Spinner /></div>}><Signup /></Suspense>} />
+        {/* <Route path='/signup' element={<Suspense fallback={<div className='flex h-96 justify-center items-center'><Spinner /></div>}><Signup /></Suspense>} /> */}
         <Route path='/dashboard' element={<PrivateRoute><Dashboard /></PrivateRoute>}/>
         <Route path= '/chat' element={<PrivateRoute><Chat/></PrivateRoute>}/>
         <Route path='*' element={<Error />} />

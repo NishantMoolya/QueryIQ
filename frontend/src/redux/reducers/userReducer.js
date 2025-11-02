@@ -6,6 +6,7 @@ const initialUser = {
     name:"",
     email:"",
     db_url: "",
+    userId: "",
     canChat: false,
     auth:false,
 }
@@ -26,19 +27,20 @@ const userSlice = createSlice({
     extraReducers:(builder) => {
           builder.addCase(userLogout.fulfilled, (state, action) => {
             clearAuthToken();
-            state = {...initialUser,auth:action.payload.auth};
+            state = {...initialUser,auth:false};
             return state;
           });
 
           builder.addCase(getUserProfile.fulfilled, (state,action) => {
-            const { auth } = action.payload;
+            const { auth } = action.payload.data;
             if (auth) {
               const { data } = action.payload;
               console.log(data);
               return {...state,...data,userId: data?._id,auth:auth}
             }else {
-              // clearAuthToken();
-              // return {...state,auth:auth}
+              clearAuthToken();
+              state = {...initialUser,auth:false};
+              return state;
             }
           });
       }

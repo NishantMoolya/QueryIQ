@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Card,
@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
 import axiosInstance from "@/api/axios";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { login } from "@/redux/reducers/userReducer";
 import { Spinner } from "@/components/ui/spinner";
 import DarkVeil from "@/components/ui/DarkVeil/DarkVeil"; // import your background component
@@ -24,6 +24,11 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const dispatch = useDispatch();
   const [isloading, setloading] = useState(false);
+  const auth = useSelector(state => state.user.auth);
+
+  useEffect(() => {
+    if(auth) navigate('/dashboard', {replace:true});
+  },[auth]);
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -34,11 +39,13 @@ const Login = () => {
 
     try {
       const payload = { email, password };
-      const res = await axiosInstance.post("/user/login", payload);
+      const res = await axiosInstance.post("/user/login", payload, { validateStatus: (status) => (status) => status >= 200 && status < 500});
       console.log(res, res.status);
       if (res.status === 200) {
         dispatch(login(res.data.user_token));
         navigate("/dashboard");
+      } else if(res.status === 401) {
+        window.alert("Invalid Credentials.");
       }
     } catch (err) {
       console.log("SERVER NOT RESPONDING PROPERLY", err);
@@ -49,28 +56,20 @@ const Login = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <div className="relative min-h-screen w-full flex items-center justify-center p-2 sm:p-6 lg:p-8">
       {/* DarkVeil Background */}
       <div className="absolute inset-0 z-0">
         <DarkVeil />
       </div>
 
-      {/* Sign Up Button - Top Right */}
-      <Button
-        onClick={() => navigate("/signup")}
-        className="fixed top-4 right-4 sm:top-6 sm:right-6 z-20 bg-[#ffffff] hover:bg-[#FF6500] text-black px-4 py-2 sm:px-5 sm:py-2 text-sm sm:text-base rounded-xl transition-all duration-300 shadow-lg hover:scale-105"
-      >
-        Sign Up
-      </Button>
-
       {/* Login Card */}
-      <Card className="w-full max-w-[90%] sm:max-w-md md:max-w-lg lg:max-w-xl bg-white/10 border border-white/20 text-white backdrop-blur-md shadow-2xl rounded-2xl p-4 sm:p-6 md:p-8 z-10">
-        <CardHeader className="text-center space-y-2 pb-6">
+      <Card className="sm:max-w-md md:max-w-lg lg:max-w-xl sm:min-w-96 max-w-full bg-white/10 border border-white/20 text-white backdrop-blur-md shadow-2xl rounded-2xl p-1 sm:p-4 z-10">
+        <CardHeader className="text-center space-y-2 sm:pb-6">
           <CardTitle className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
             Login
           </CardTitle>
           <CardDescription className="text-gray-400 text-sm sm:text-base">
-            Access your account to query your databases.
+            Access your account to query your databases and documents.
           </CardDescription>
         </CardHeader>
 
@@ -114,22 +113,15 @@ const Login = () => {
           </div>
         </CardContent>
 
-        <CardFooter className="flex flex-col gap-3 pt-6">
+        <CardFooter className="flex flex-col pt-3 sm:pt-6">
           <Button
             onClick={handleLogin}
             variant="default"
             size="lg"
-            className="w-full bg-[#ffffff] hover:bg-[#FF6500] text-black text-sm sm:text-base font-semibold rounded-xl py-2.5 sm:py-3 transition-all duration-300 hover:scale-105 hover:shadow-[0_8px_25px_rgba(255,101,0,0.5)] shadow-lg"
+            className="w-full bg-[#ffffff] hover:bg-[#FF6500] text-black text-sm sm:text-base font-semibold rounded-xl py-2.5 sm:py-3 mb-3 transition-all duration-300 hover:scale-105 hover:shadow-[0_8px_25px_rgba(255,101,0,0.5)] shadow-lg"
           >
             {isloading ? <Spinner /> : " Login"}
           </Button>
-
-          <button
-            type="button"
-            className="text-gray-400 hover:text-[#FF6500] text-xs sm:text-sm transition-colors duration-200 underline-offset-2 hover:underline"
-          >
-            Forgot Password?
-          </button>
         </CardFooter>
       </Card>
     </div>
