@@ -1,6 +1,6 @@
 from langchain_mongodb.vectorstores import MongoDBAtlasVectorSearch
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain.schema import Document
+from langchain_core.documents import Document
 from typing import List, Optional
 from db.connect import db
 
