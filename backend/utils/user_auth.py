@@ -3,6 +3,7 @@ import jwt
 from datetime import datetime, timedelta
 from core.config import settings
 from models.utils_models import DecodedToken
+from typing import Union
 
 def get_password_hash(password: str) -> str:
     # bcrypt expects bytes, so encode the password string
@@ -15,7 +16,7 @@ def get_password_hash(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
-def create_access_token(user_id: str, expires_delta: timedelta | None = None):
+def create_access_token(user_id: str, expires_delta: Union[timedelta, None] = None):
     to_encode = {"_id": user_id}
     expire = datetime.now() + (expires_delta or timedelta(minutes=settings.JWT_EXPIRE_TIME))
     to_encode.update({"exp": expire})
