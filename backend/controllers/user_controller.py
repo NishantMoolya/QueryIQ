@@ -63,16 +63,17 @@ async def user_profile(user_id: str):
     try:
         db_user = users.find_one({"_id": ObjectId(user_id)})
         if not db_user:
-            return JSONResponse(status_code=404, content={"message": "User not found"})
+            return JSONResponse(status_code=404, content={"message": "User not found", "data" : {"auth": False}})
 
         user_data = {
             "name": db_user["username"],
             "email": db_user["email"],
-            "_id": str(db_user["_id"])
+            "_id": str(db_user["_id"]),
+            "auth": True
         }
 
         return JSONResponse(status_code=200, content={"message": "Profile fetched successfully", "data": user_data})
 
     except Exception as e:
         print(f"An unexpected error occurred while fetching profile: {str(e)}")
-        return JSONResponse(status_code=500, content={"message": "An unexpected error occurred"})
+        return JSONResponse(status_code=500, content={"message": "An unexpected error occurred", "data" : {"auth": False}})
