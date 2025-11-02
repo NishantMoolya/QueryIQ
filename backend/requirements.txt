@@ -16,3 +16,4 @@ psycopg2
 aiohttp
 uuid
 sentence-transformers
+pandas
