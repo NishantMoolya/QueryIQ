@@ -17,7 +17,7 @@ const ConnectDatabases = () => {
     const fetchDBUrls = async () => {
         try {
             setIsFetching(true);
-            const res = await axiosInstance.get("/file?file_type=db");
+            const res = await axiosInstance.get("/file/?file_type=db");
             // console.log("DB urls: ", res);
             setDBUrlList(res.data.data || []);
         } catch (err) {

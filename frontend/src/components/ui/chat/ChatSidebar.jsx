@@ -13,7 +13,7 @@ const ChatSidebar = ({ isOpen, setIsOpen, handleDBSelect, handleDocSelect, selec
     const fetchDBUrls = async () => {
         try {
             setIsDBFetching(true);
-            const res = await axiosInstance.get("/file?file_type=db");
+            const res = await axiosInstance.get("/file/?file_type=db");
             // console.log("DB urls: ", res);
             setDatabases(prev => [...res.data.data]);
         } catch (err) {
@@ -27,7 +27,7 @@ const ChatSidebar = ({ isOpen, setIsOpen, handleDBSelect, handleDocSelect, selec
     const fetchFileUrls = async () => {
         try {
             setIsDocFetching(true);
-            const res = await axiosInstance.get("/file?file_type=application/pdf&file_type=csv");
+            const res = await axiosInstance.get("/file/?file_type=application/pdf&file_type=csv");
             // console.log("File urls: ", res);
             setDocuments(prev => [...res.data.data]);
         } catch (err) {

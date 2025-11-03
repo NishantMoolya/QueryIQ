@@ -15,7 +15,7 @@ const ConnectDocuments = () => {
     const fetchFileUrls = async () => {
         try {
             setIsFetching(true);
-            const res = await axiosInstance.get("/file?file_type=application/pdf&file_type=csv");
+            const res = await axiosInstance.get("/file/?file_type=application/pdf&file_type=csv");
             console.log("File urls: ", res);
             setDocuments(res.data.data || []);
         } catch (err) {
