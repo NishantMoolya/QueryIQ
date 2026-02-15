@@ -7,6 +7,7 @@ from services.general_chatbot import general_chat
 from db.connect import db
 from models.chat_models import UserQuery
 from bson import ObjectId
+from fastapi.encoders import jsonable_encoder
 
 user_files = db["user_files"]
 
@@ -65,7 +66,7 @@ async def router_based_chat(user_id: str, user_query: UserQuery):
             if len(res.strip()) == 0:
                 raise Exception("no response returned")
         
-        return JSONResponse(status_code=200,content={"message": "chat successful", "data": {"res": res, "type": res_type}})
+        return JSONResponse(status_code=200,content={"message": "chat successful", "data": {"res": jsonable_encoder(res), "type": res_type}})
     except Exception as e:
         # Handle unexpected errors
         print(f"An unexpected error occurred: {str(e)}")
